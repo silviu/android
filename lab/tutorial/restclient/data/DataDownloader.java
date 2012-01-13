@@ -131,16 +131,25 @@ public class DataDownloader extends Thread
 		ArrayList<DataEntry> sensor_list = getDESensors();
 
 		String db_entry = new String();
-		for (int i = 0; (i < sensor_list.size() && i < 50); i++)
+		for (int i = 0; (i < sensor_list.size() && i < 200); i++)
 		{
 			DataEntry curr = sensor_list.get(i);
+			if (curr.extAddress.equalsIgnoreCase("null"))
+				continue;
+			
+			String sensor_type = "nothing";
+			if (curr.clusterID == 402)
+				sensor_type = "temperature";
+			else if ((curr.clusterID == 404))
+				sensor_type = "flow";
 			if (i == 0)
 			{
 				db_entry += "SELECT " + Integer.toString(curr.id) + " AS '_ID', '" +
 				curr.extAddress + "' AS 'extAddress', '" +
 				Integer.toString(curr.endpoint) + "' AS 'endpoint', '" +
 				Integer.toString(curr.clusterID) + "' AS 'clusterID', '" +
-				extAddress_to_location.get(curr.extAddress) + "' AS 'location' ";
+				extAddress_to_location.get(curr.extAddress) + "' AS 'location', '"+
+				sensor_type + "' AS 'type' ";
 			}
 			else
 			{
@@ -148,7 +157,8 @@ public class DataDownloader extends Thread
 				curr.extAddress + "', '" +
 				Integer.toString(curr.endpoint) + "', '" +
 				Integer.toString(curr.clusterID) + "', '" +
-				extAddress_to_location.get(curr.extAddress) + "'";
+				extAddress_to_location.get(curr.extAddress) + "', '"+
+				sensor_type + "'";
 
 			}
 
@@ -163,25 +173,39 @@ public class DataDownloader extends Thread
 
 		String db_entry = new String();
 		Log.e("SENZOOOOOR SIZE", Integer.toString(sensor_list.size()));
-		for (int i = 0; (i < sensor_list.size() && i < 50); i++)
+		for (int i = 0; (i < sensor_list.size() && i < 200); i++)
 		{
 			DataEntry curr = sensor_list.get(i);
+			
+			String sensor_type = "nothing";
+			if (curr.clusterID == 402)
+				sensor_type = "temperature";
+			else if (curr.clusterID == 404)
+				sensor_type = "flow";
+			
+			
 
 			String no_accolades = curr.attributes.substring(1, curr.attributes.length()-1);
 			String[] split_values = no_accolades.split(":");
 			String str_val = split_values[1];
-			int val = 0;
+			double val = 0;
 			if (curr.clusterID == 402)
-				val = Integer.parseInt(str_val, 16)/100;
-			else
-				val = Integer.parseInt(str_val, 16)/10;
+			{
+				int tmp = Integer.parseInt(str_val, 16);
+				val = ((double)tmp/100);
+			}
+			else {
+				int tmp = Integer.parseInt(str_val, 16);
+				val = ((double)tmp/10);
+			}
 
 			if (i == 0)
 			{
 				db_entry += "SELECT " + Integer.toString(curr.id) + " AS '_ID', '" +
 				curr.extAddress + "' AS 'extAddress', '" +
 				Integer.toString(curr.endpoint) + "' AS 'endpoint', '" +
-				Integer.toString(val) + "' AS 'attributes', '" +
+				Double.toString(val) + "' AS 'attributes', '" +
+				sensor_type + "' AS 'type', '" +
 				Long.toString(curr.timestamp) + "' AS 'timestamp' ";
 
 			}
@@ -190,7 +214,8 @@ public class DataDownloader extends Thread
 				db_entry += "UNION SELECT  " +  Integer.toString(curr.id) + " AS '_ID', '" +
 				curr.extAddress + "', '" +
 				Integer.toString(curr.endpoint) + "', '" +
-				Integer.toString(val) + "', '" +
+				Double.toString(val) + "', '" +
+				sensor_type + "', '" +
 				Long.toString(curr.timestamp) + "'";
 			}	
 

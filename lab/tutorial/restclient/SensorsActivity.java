@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 
 import lab.tutorial.restclient.data.SmartHomeProvider;
+import lab.tutorial.restclient.sensors.FlowSensor;
 import lab.tutorial.restclient.sensors.Sensor;
 import lab.tutorial.restclient.sensors.SensorConstants;
 import lab.tutorial.restclient.sensors.TemperatureSensor;
@@ -70,12 +71,20 @@ public class SensorsActivity extends Activity {
         Cursor c = managedQuery(allSensors, null, null, null, null);
         if (c.moveToFirst()) {
         	do{
+        		if (c.getString(c.getColumnIndex(SmartHomeProvider.type)).equalsIgnoreCase("temperature"))
         		senzori.add( new TemperatureSensor(c.getInt(c.getColumnIndex(SmartHomeProvider._ID1)), 
         						c.getString(c.getColumnIndex(SmartHomeProvider.extAddress)),
         						c.getString(c.getColumnIndex(SmartHomeProvider.endpoint)),
         						c.getString(c.getColumnIndex(SmartHomeProvider.clusterID)),
         						c.getString(c.getColumnIndex(SmartHomeProvider.location))
         						));
+        		else
+        			senzori.add( new FlowSensor(c.getInt(c.getColumnIndex(SmartHomeProvider._ID1)), 
+    						c.getString(c.getColumnIndex(SmartHomeProvider.extAddress)),
+    						c.getString(c.getColumnIndex(SmartHomeProvider.endpoint)),
+    						c.getString(c.getColumnIndex(SmartHomeProvider.clusterID)),
+    						c.getString(c.getColumnIndex(SmartHomeProvider.location))
+    						));
         	} while (c.moveToNext());
         }
         
@@ -209,6 +218,8 @@ public class SensorsActivity extends Activity {
                 }
                 
                 Sensor s = items.get(position);
+                Uri allSensors = Uri.parse(provider+"/sensors");
+                Cursor c_sensor = managedQuery(allSensors, null, null, null, null);
                 if (s != null) {
                         TextView t = (TextView) v.findViewById(R.id.txtName);
                         if (t != null) {
@@ -223,8 +234,14 @@ public class SensorsActivity extends Activity {
                         		Uri sensorValue = Uri.parse(provider+"/value/"+s.getId());
                         		String[] columns = {"max(timestamp)","attributes"};
                         		Cursor c = managedQuery(sensorValue, columns, null, null, null);
+                        		
                         		if (c.moveToFirst()) {
-                        			t.setText(c.getDouble(c.getColumnIndex("attributes"))+((TemperatureSensor)s).getUnit());                            
+                        			if(c_sensor.moveToFirst())
+                                		if (c_sensor.getString(c_sensor.getColumnIndex(SmartHomeProvider.type)).equalsIgnoreCase("temperature"))
+                            			t.setText(c.getDouble(c.getColumnIndex("attributes"))+((TemperatureSensor)s).getUnit());  
+                        			else
+                            			t.setText(c.getDouble(c.getColumnIndex("attributes"))+((FlowSensor)s).getUnit());  
+
                         		}
                         }
                         

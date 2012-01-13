@@ -6,7 +6,8 @@ public class SensorConstants {
 	public static final String SENSOR = "senzor";
 	public static final String SENSOR_SET = "senzorSet";
 	public static final String TEMPERATURE = "temperature";
-	
+	public static final String FLOW = "flow";
+
 	// values
 	public static final String VALUE = "valoare";
 	public static final String VALUE_OF_SENSOR = "valoare/senzor/";
