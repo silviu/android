@@ -129,7 +129,7 @@ public class ActuatorsActivity extends Activity {
                 if (o != null) {
                         TextView t = (TextView) v.findViewById(R.id.txtName);
                         if (t != null) {
-                              t.setText(o.getExtAddress());                            
+                              t.setText(Long.toString(o.getTimestamp()));                            
                         }
                         t = (TextView) v.findViewById(R.id.txtLocation);
                         if (t != null) {

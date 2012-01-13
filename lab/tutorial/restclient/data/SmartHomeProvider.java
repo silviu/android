@@ -26,7 +26,8 @@ public class SmartHomeProvider extends ContentProvider {
 	// Remove server initialisation
 	public static final String protocol = "http://";
 	public static final String host = "embedded.cs.pub.ro/";
-	public static final String serverURL = "si/zigbee/status";
+	public static final String statusURL = "si/zigbee/status";
+	public static final String cmdURL = "si/zigbee/status";
 
 	public static final String PROVIDER_NAME = "lab.tutorial.restclient.data.SmartHomeProvider";
 
@@ -47,7 +48,7 @@ public class SmartHomeProvider extends ContentProvider {
 	public static final String type = "type";
 
 
-	
+
 	//for sensor values
 	public static final String _ID2 = "_id";
 	public static final String attributes = "attributes";
@@ -114,36 +115,39 @@ public class SmartHomeProvider extends ContentProvider {
 			// Hack-ish initialisation. In a real case a smarter initialization is needed.
 			db.execSQL("DROP TABLE IF EXISTS "+DATABASE_TABLE_SENSORS);
 			db.execSQL("CREATE TABLE " + DATABASE_TABLE_SENSORS + " (" + _ID1 + 
-					   " INTEGER PRIMARY KEY AUTOINCREMENT," + 
-					   "extAddress text, endpoint text, clusterID text, location text, type text, tstamp timestamp);");
-			
-			
+					" INTEGER PRIMARY KEY AUTOINCREMENT," + 
+			"extAddress text, endpoint text, clusterID text, location text, type text, tstamp timestamp);");
+
+
 			db.execSQL("DROP TABLE IF EXISTS "+DATABASE_TABLE_SENSORVALUES);
 			db.execSQL("CREATE TABLE " + DATABASE_TABLE_SENSORVALUES + " (" + _ID2 + 
-					   " INTEGER PRIMARY KEY AUTOINCREMENT," + 
-					   "extAddress text, endpoint text, attributes text, type text, tstamp timestamp);");
-			
-			
+					" INTEGER PRIMARY KEY AUTOINCREMENT," + 
+			"extAddress text, endpoint text, attributes text, type text, tstamp timestamp);");
+
+
 			db.execSQL("DROP TABLE IF EXISTS "+DATABASE_TABLE_ACTUATORS);
 			db.execSQL("CREATE TABLE " + DATABASE_TABLE_ACTUATORS + " (" + _ID2 + 
-					   " INTEGER PRIMARY KEY AUTOINCREMENT," + 
-					   "extAddress text, endpoint text, clusterID text, location text, tstamp timestamp, setting text);");
+					" INTEGER PRIMARY KEY AUTOINCREMENT," + 
+			"extAddress text, endpoint text, clusterID text, location text, tstamp timestamp, setting text);");
 			try {
-				
+
 				//TODO: Add sensors, sensor values and acutuators to the databases
 				// pentru ca metoda asta e apelata o singura data cand e creata aplicatia/baza de date
 				// aici pot apela initialdownload()
+
+
 				Log.d("SMARTHOMEPROVIDER", "ADDING DATA TO DATABASE");
 				String senzori = downl.getDBSensors();
 				Log.d("DATABASE INSERT", "WTFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF");
 				db.execSQL("INSERT INTO "+DATABASE_TABLE_SENSORS+" "+senzori);
-				
+
+
 				String values = downl.getDBSensorValues();
 				db.execSQL("INSERT INTO "+DATABASE_TABLE_SENSORVALUES+" "+values);
 				
 				String actuatori = downl.getDBActuators();
 				db.execSQL("INSERT INTO "+DATABASE_TABLE_ACTUATORS+" "+actuatori);
-				
+
 			} catch (Exception e) {
 				e.printStackTrace();
 				Log.d("DatabaseDownloader", "Exceptie la adaugare in baza de date");
@@ -235,7 +239,7 @@ public class SmartHomeProvider extends ContentProvider {
 		switch (uriMatcher.match(uri)){
 		case UPDATEACTUATOR:
 			String newValue = values.getAsString(SETTING); 
-			String serverUri = protocol + host + serverURL + 
+			String serverUri = protocol + host + cmdURL + 
 			ActuatorConstants.ACTUATOR + "/" + uri.getPathSegments().get(1) + ActuatorConstants.SETTING + 
 			newValue;
 			try {

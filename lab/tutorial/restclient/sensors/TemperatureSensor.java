@@ -1,6 +1,5 @@
 package lab.tutorial.restclient.sensors;
 
-
 public class TemperatureSensor extends Sensor {
 	
 	private String unit = "°C";

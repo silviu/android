@@ -45,7 +45,7 @@ import com.androidplot.xy.XYPlot;
 import com.androidplot.xy.XYStepMode;
 
 public class SensorsActivity extends Activity {
-	
+
 	// Local data
 	private String provider = "content://lab.tutorial.restclient.data.SmartHomeProvider";
 	ArrayList<Sensor> senzori;
@@ -53,211 +53,215 @@ public class SensorsActivity extends Activity {
 	private ListView lv;
 	private XYPlot mySimpleXYPlot;
 	private ViewFlipper flipper;
-	
-    /** Called when the activity is first created. */
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        
-        // UI initialisation
-        setContentView(R.layout.sensors);
-        flipper = (ViewFlipper) findViewById(R.id.flipper);
-        lv = (ListView) findViewById(R.id.listView);
-        mySimpleXYPlot = (XYPlot) findViewById(R.id.mySimpleXYPlot);
-        
-        // Read data from local cache
-        senzori = new ArrayList<Sensor>();
-        Uri allSensors = Uri.parse(provider+"/sensors");
-        Cursor c = managedQuery(allSensors, null, null, null, null);
-        if (c.moveToFirst()) {
-        	do{
-        		if (c.getString(c.getColumnIndex(SmartHomeProvider.type)).equalsIgnoreCase("temperature"))
-        		senzori.add( new TemperatureSensor(c.getInt(c.getColumnIndex(SmartHomeProvider._ID1)), 
-        						c.getString(c.getColumnIndex(SmartHomeProvider.extAddress)),
-        						c.getString(c.getColumnIndex(SmartHomeProvider.endpoint)),
-        						c.getString(c.getColumnIndex(SmartHomeProvider.clusterID)),
-        						c.getString(c.getColumnIndex(SmartHomeProvider.location)),
-        						c.getLong(c.getColumnIndex(SmartHomeProvider.timestamp))
 
-        						));
-        		else
-        			senzori.add( new FlowSensor(c.getInt(c.getColumnIndex(SmartHomeProvider._ID1)), 
-    						c.getString(c.getColumnIndex(SmartHomeProvider.extAddress)),
-    						c.getString(c.getColumnIndex(SmartHomeProvider.endpoint)),
-    						c.getString(c.getColumnIndex(SmartHomeProvider.clusterID)),
-    						c.getString(c.getColumnIndex(SmartHomeProvider.location)),
-    						c.getLong(c.getColumnIndex(SmartHomeProvider.timestamp))
+	/** Called when the activity is first created. */
+	@Override
+	public void onCreate(Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
 
-    						));
-        	} while (c.moveToNext());
-        }
-        
-        // Configure UI for the sensor list
-        final ListWithImageAdapter la = new ListWithImageAdapter(this,R.layout.list_item, senzori);
-        lv.setAdapter(la);
-        
-        //TODO: De reparat graficele. se asteapta la numere reale dde la Smarthomeprovider.VALUE, 
-        		//dar eu am un String attributes
-        
-        // What happens when you click a button in the Sensor list
-        lv.setOnItemClickListener(new OnItemClickListener() {
-    	    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-    	    	flipper.showNext();
-    	    	TemperatureSensor s = (TemperatureSensor)senzori.get(position);
-        		Number[] timestamps = new Number[5];
-        		Number[] values = new Number[5];
-    	    	Uri allValues = Uri.parse(provider+"/values/"+s.getId());
-    	        Cursor c = managedQuery(allValues, null, null, null, null);
-    	        int i=0;
-    	        if (c.moveToFirst()) {
-    	        	do{
-    	        		// Difference between SQL Timestamp and Java Timestamp, got to *1000
-    	        		timestamps[i] = new Long(c.getLong(c.getColumnIndex(SmartHomeProvider.timestamp))*1000);
-    	        		values[i] = new Double(c.getDouble(c.getColumnIndex(SmartHomeProvider.attributes)));
-    	        	} while (c.moveToNext() && ++i<5);
-    	        }
-    	    	createChart(timestamps, values, s);
-    	    }
-        });
-    }
-    
-    private void createChart(Number[] timestamps, Number[] values, TemperatureSensor s){
-    	mySimpleXYPlot.clear();
+		// UI initialisation
+		setContentView(R.layout.sensors);
+		flipper = (ViewFlipper) findViewById(R.id.flipper);
+		lv = (ListView) findViewById(R.id.listView);
+		mySimpleXYPlot = (XYPlot) findViewById(R.id.mySimpleXYPlot);
 
-    	// create our series from our array of nums:
-        XYSeries series = new SimpleXYSeries(
-                Arrays.asList(timestamps),
-                Arrays.asList(values),
-                "Temperatura de la senzor");
- 
-        mySimpleXYPlot.getGraphWidget().getGridBackgroundPaint().setColor(Color.WHITE);
-        mySimpleXYPlot.getGraphWidget().getGridLinePaint().setColor(Color.BLACK);
-        mySimpleXYPlot.getGraphWidget().getGridLinePaint().setPathEffect(new DashPathEffect(new float[]{1,1}, 1));
-        mySimpleXYPlot.getGraphWidget().getDomainOriginLinePaint().setColor(Color.BLACK);
-        mySimpleXYPlot.getGraphWidget().getRangeOriginLinePaint().setColor(Color.BLACK);
-        mySimpleXYPlot.getGraphWidget().getDomainLabelPaint().setTextSize(16);
-        mySimpleXYPlot.getGraphWidget().getRangeLabelPaint().setTextSize(16);
-        mySimpleXYPlot.getGraphWidget().getCursorLabelPaint().setTextSize(16);
- 
-        mySimpleXYPlot.setBorderStyle(Plot.BorderStyle.SQUARE, null, null);
-        mySimpleXYPlot.getBorderPaint().setStrokeWidth(1);
-        mySimpleXYPlot.getBorderPaint().setAntiAlias(false);
-        mySimpleXYPlot.getBorderPaint().setColor(Color.WHITE);
- 
-        // setup our line fill paint to be a slightly transparent gradient:
-        Paint lineFill = new Paint();
-        lineFill.setAlpha(200);
-        lineFill.setShader(new LinearGradient(0, 0, 0, 250, Color.WHITE, Color.GREEN, Shader.TileMode.MIRROR));
- 
-        LineAndPointFormatter formatter  = new LineAndPointFormatter(Color.rgb(0, 0,0), Color.BLUE, Color.RED);
-        formatter.setFillPaint(lineFill);
-        mySimpleXYPlot.getGraphWidget().setPadding(2, 2, 15, 10);
-        mySimpleXYPlot.addSeries(series, formatter);
-        mySimpleXYPlot.setRangeBoundaries(-5, 40, BoundaryMode.FIXED);
-        
-        // draw a domain tick for each entry:
-        mySimpleXYPlot.setDomainStep(XYStepMode.SUBDIVIDE, timestamps.length);
- 
-        // customize our domain/range labels
-        mySimpleXYPlot.setDomainLabel("Ora");
-       	mySimpleXYPlot.setRangeLabel(s.getExtAddress()+" ("+s.getUnit()+")");
- 
-        // get rid of decimal points in our range labels:
-       // mySimpleXYPlot.setRangeValueFormat(new DecimalFormat("0"));
- 
-        mySimpleXYPlot.setDomainValueFormat(new SimpleDateFormat("k:mm"));
- 
-        // by default, AndroidPlot displays developer guides to aid in laying out your plot.
-        // To get rid of them call disableAllMarkup():
-        mySimpleXYPlot.disableAllMarkup();
-    }
-    
-    // What happens when you press the back button on your phone
-    @Override
-    public void onBackPressed() {
-    	flipper.showPrevious();
-    }
-    
-    // What happens when you press the menu button on your phone
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        MenuInflater inflater = getMenuInflater();
-        inflater.inflate(R.menu.menu, menu);
-        return true;
-    }
-    // What happens when you press a button in the Options menu
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle item selection
-        switch (item.getItemId()) {
-        case R.id.sensors:
-        	Intent sIntent = new Intent(this, SensorsActivity.class);
-        	startActivity(sIntent);
-        	return true;
-        case R.id.actuators:
-        	Intent aIntent = new Intent(this, ActuatorsActivity.class);
-        	startActivity(aIntent);
-            return true;
-        default:
-            return super.onOptionsItemSelected(item);
-        }
-    }
-    
-    // Custom adapter to populate the sensors list
-    private class ListWithImageAdapter extends ArrayAdapter<Sensor> {
+		// Read data from local cache
+		senzori = new ArrayList<Sensor>();
+		Uri allSensors = Uri.parse(provider+"/sensors");
+		Cursor c = managedQuery(allSensors, null, null, null, null);
+		if (c.moveToFirst()) {
+			do{
+				if (c.getString(c.getColumnIndex(SmartHomeProvider.type)).equalsIgnoreCase("temperature"))
+					senzori.add( new TemperatureSensor(c.getInt(c.getColumnIndex(SmartHomeProvider._ID1)), 
+							c.getString(c.getColumnIndex(SmartHomeProvider.extAddress)),
+							c.getString(c.getColumnIndex(SmartHomeProvider.endpoint)),
+							c.getString(c.getColumnIndex(SmartHomeProvider.clusterID)),
+							c.getString(c.getColumnIndex(SmartHomeProvider.location)),
+							c.getLong(c.getColumnIndex(SmartHomeProvider.timestamp))
 
-    	private ArrayList<Sensor> items;
+					));
+				else
+					senzori.add( new FlowSensor(c.getInt(c.getColumnIndex(SmartHomeProvider._ID1)), 
+							c.getString(c.getColumnIndex(SmartHomeProvider.extAddress)),
+							c.getString(c.getColumnIndex(SmartHomeProvider.endpoint)),
+							c.getString(c.getColumnIndex(SmartHomeProvider.clusterID)),
+							c.getString(c.getColumnIndex(SmartHomeProvider.location)),
+							c.getLong(c.getColumnIndex(SmartHomeProvider.timestamp))
 
-    	public ListWithImageAdapter(Context context, int textViewResourceId, ArrayList<Sensor> items) {
-                super(context, textViewResourceId, items);
-                this.items = items;
-        }
+					));
+			} while (c.moveToNext());
+		}
 
-        @Override
-        public View getView(int position, View convertView, ViewGroup parent) {
-                View v = convertView;
-                if (v == null) {
-                    LayoutInflater vi = (LayoutInflater)getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-                    v = vi.inflate(R.layout.list_item, null);
-                }
-                
-                Sensor s = items.get(position);
-                Uri allSensors = Uri.parse(provider+"/sensors");
-            //    String[] columns_sensor = {"max(tstamp)", "clusterID", "endpoint", "extAddress", "location", "type"};
-                Cursor c_sensor = managedQuery(allSensors, null, null, null, null);
-                if (s != null) {
-                        TextView t = (TextView) v.findViewById(R.id.txtName);
-                        if (t != null) {
-                              t.setText(Long.toString(s.getTimestamp()));                            
-                        }
-                        t = (TextView) v.findViewById(R.id.txtLocation);
-                        if (t != null) {
-                              t.setText(s.getLocation());                            
-                        }
-                        t = (TextView) v.findViewById(R.id.txtValue);
-                        if (t != null) {
-                        		Uri sensorValue = Uri.parse(provider+"/value/"+s.getId());
-                        		String[] columns = {"tstamp","attributes"};
-                        		Cursor c = managedQuery(sensorValue, columns, null, null, null);
-                        		
-                        		if (c.moveToFirst()) {
-                        			if(c_sensor.moveToFirst())
-                                		if (c_sensor.getString(c_sensor.getColumnIndex(SmartHomeProvider.type)).equalsIgnoreCase("temperature"))
-                            			t.setText(c.getDouble(c.getColumnIndex("attributes"))+((TemperatureSensor)s).getUnit());  
-                        			else
-                            			t.setText(c.getDouble(c.getColumnIndex("attributes"))+((FlowSensor)s).getUnit());  
+		// Configure UI for the sensor list
+		final ListWithImageAdapter la = new ListWithImageAdapter(this,R.layout.list_item, senzori);
+		lv.setAdapter(la);
 
-                        		}
-                        }
-                        
-                        ImageView i = (ImageView) v.findViewById(R.id.img);
-                        if (i != null) {
-                        	if (s.getType()==SensorConstants.TEMPERATURE) {
-                        		i.setImageResource(R.drawable.temperature);
-                        	}
-                        }
-                }
-                return v;
-        }
-    }
+		//TODO: De reparat graficele. se asteapta la numere reale dde la Smarthomeprovider.VALUE, 
+		//dar eu am un String attributes
+
+		// What happens when you click a button in the Sensor list
+		lv.setOnItemClickListener(new OnItemClickListener() {
+			public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+				flipper.showNext();
+				TemperatureSensor s = (TemperatureSensor)senzori.get(position);
+				Number[] timestamps = new Number[5];
+				Number[] values = new Number[5];
+				Uri allValues = Uri.parse(provider+"/values/"+s.getId());
+				Cursor c = managedQuery(allValues, null, null, null, null);
+				int i=0;
+				if (c.moveToFirst()) {
+					do{
+						// Difference between SQL Timestamp and Java Timestamp, got to *1000
+						timestamps[i] = new Long(c.getLong(c.getColumnIndex(SmartHomeProvider.timestamp))*1000);
+						values[i] = new Double(c.getDouble(c.getColumnIndex(SmartHomeProvider.attributes)));
+					} while (c.moveToNext() && ++i<5);
+				}
+				createChart(timestamps, values, s);
+			}
+		});
+	}
+
+	private void createChart(Number[] timestamps, Number[] values, TemperatureSensor s){
+		mySimpleXYPlot.clear();
+
+		// create our series from our array of nums:
+		XYSeries series = new SimpleXYSeries(
+				Arrays.asList(timestamps),
+				Arrays.asList(values),
+				"Temperatura de la senzor");
+
+		mySimpleXYPlot.getGraphWidget().getGridBackgroundPaint().setColor(Color.WHITE);
+		mySimpleXYPlot.getGraphWidget().getGridLinePaint().setColor(Color.BLACK);
+		mySimpleXYPlot.getGraphWidget().getGridLinePaint().setPathEffect(new DashPathEffect(new float[]{1,1}, 1));
+		mySimpleXYPlot.getGraphWidget().getDomainOriginLinePaint().setColor(Color.BLACK);
+		mySimpleXYPlot.getGraphWidget().getRangeOriginLinePaint().setColor(Color.BLACK);
+		mySimpleXYPlot.getGraphWidget().getDomainLabelPaint().setTextSize(16);
+		mySimpleXYPlot.getGraphWidget().getRangeLabelPaint().setTextSize(16);
+		mySimpleXYPlot.getGraphWidget().getCursorLabelPaint().setTextSize(16);
+
+		mySimpleXYPlot.setBorderStyle(Plot.BorderStyle.SQUARE, null, null);
+		mySimpleXYPlot.getBorderPaint().setStrokeWidth(1);
+		mySimpleXYPlot.getBorderPaint().setAntiAlias(false);
+		mySimpleXYPlot.getBorderPaint().setColor(Color.WHITE);
+
+		// setup our line fill paint to be a slightly transparent gradient:
+		Paint lineFill = new Paint();
+		lineFill.setAlpha(200);
+		lineFill.setShader(new LinearGradient(0, 0, 0, 250, Color.WHITE, Color.GREEN, Shader.TileMode.MIRROR));
+
+		LineAndPointFormatter formatter  = new LineAndPointFormatter(Color.rgb(0, 0,0), Color.BLUE, Color.RED);
+		formatter.setFillPaint(lineFill);
+		mySimpleXYPlot.getGraphWidget().setPadding(2, 2, 15, 10);
+		mySimpleXYPlot.addSeries(series, formatter);
+		mySimpleXYPlot.setRangeBoundaries(-5, 40, BoundaryMode.FIXED);
+
+		// draw a domain tick for each entry:
+		mySimpleXYPlot.setDomainStep(XYStepMode.SUBDIVIDE, timestamps.length);
+
+		// customize our domain/range labels
+		mySimpleXYPlot.setDomainLabel("Ora");
+		mySimpleXYPlot.setRangeLabel(s.getExtAddress()+" ("+s.getUnit()+")");
+
+		// get rid of decimal points in our range labels:
+		// mySimpleXYPlot.setRangeValueFormat(new DecimalFormat("0"));
+
+		mySimpleXYPlot.setDomainValueFormat(new SimpleDateFormat("k:mm"));
+
+		// by default, AndroidPlot displays developer guides to aid in laying out your plot.
+		// To get rid of them call disableAllMarkup():
+		mySimpleXYPlot.disableAllMarkup();
+	}
+
+	// What happens when you press the back button on your phone
+	@Override
+	public void onBackPressed() {
+		flipper.showPrevious();
+	}
+
+	// What happens when you press the menu button on your phone
+	@Override
+	public boolean onCreateOptionsMenu(Menu menu) {
+		MenuInflater inflater = getMenuInflater();
+		inflater.inflate(R.menu.menu, menu);
+		return true;
+	}
+	// What happens when you press a button in the Options menu
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		// Handle item selection
+		switch (item.getItemId()) {
+		case R.id.sensors:
+			Intent sIntent = new Intent(this, SensorsActivity.class);
+			startActivity(sIntent);
+			return true;
+		case R.id.actuators:
+			Intent aIntent = new Intent(this, ActuatorsActivity.class);
+			startActivity(aIntent);
+			return true;
+		default:
+			return super.onOptionsItemSelected(item);
+		}
+	}
+
+	// Custom adapter to populate the sensors list
+	private class ListWithImageAdapter extends ArrayAdapter<Sensor> {
+
+		private ArrayList<Sensor> items;
+
+		public ListWithImageAdapter(Context context, int textViewResourceId, ArrayList<Sensor> items) {
+			super(context, textViewResourceId, items);
+			this.items = items;
+		}
+
+		@Override
+		public View getView(int position, View convertView, ViewGroup parent) {
+			View v = convertView;
+			if (v == null) {
+				LayoutInflater vi = (LayoutInflater)getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+				v = vi.inflate(R.layout.list_item, null);
+			}
+
+			Sensor s = items.get(position);
+			Uri allSensors = Uri.parse(provider+"/sensors");
+			Cursor c_sensor = managedQuery(allSensors, null, null, null, null);
+			if (s != null) {
+				TextView t = (TextView) v.findViewById(R.id.txtName);
+				if (t != null) {
+					t.setText(Long.toString(s.getTimestamp()));                            
+				}
+				t = (TextView) v.findViewById(R.id.txtLocation);
+				if (t != null) {
+					t.setText(s.getLocation());                            
+				}
+				t = (TextView) v.findViewById(R.id.txtValue);
+				if (t != null) {
+					Uri sensorValue = Uri.parse(provider+"/value/"+s.getId());
+					String[] columns = {"attributes"};
+					Cursor c = managedQuery(sensorValue, columns, null, null, null);
+
+					if (c.moveToFirst()) {
+						if(c_sensor.moveToFirst()) {
+							if (s.getType().equalsIgnoreCase("flow"))
+								t.setText(c.getDouble(c.getColumnIndex("attributes"))+((FlowSensor)s).getUnit());  
+							else
+								t.setText(c.getDouble(c.getColumnIndex("attributes"))+((TemperatureSensor)s).getUnit());  
+						}
+					}
+				}
+				
+
+				ImageView i = (ImageView) v.findViewById(R.id.img);
+				if (i != null) {
+					if (s.getType()==SensorConstants.TEMPERATURE) {
+						i.setImageResource(R.drawable.temperature);
+					}
+					else {
+						i.setImageResource(R.drawable.meter);
+					}
+				}
+				
+			}
+			return v;
+		}
+	}
 }

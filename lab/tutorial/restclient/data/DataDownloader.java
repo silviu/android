@@ -36,15 +36,14 @@ public class DataDownloader extends Thread
 {
 	private Boolean first_run = true;
 	private String URI = "http://embedded.cs.pub.ro/si/zigbee/status";
-	public ArrayList<DataEntry> dentry_list = new ArrayList<DataEntry>();
-	Map<String, String> extAddress_to_location = new HashMap<String, String>();
+	private ArrayList<DataEntry> dentry_list = new ArrayList<DataEntry>();
+	private Map<String, String> extAddress_to_location = new HashMap<String, String>();
 
-
-	public static final int CLUSTER_ID_TEMP = 402;
-	public static final int CLUSTER_ID_FLOW = 404;
-	public static final int CLUSTER_ID_SWITCH = 7;
-	public static final int CLUSTER_ID_TERMOSTAT = 201;
-	public static final int CLUSTER_ID_BASIC = 0;
+	private static final int CLUSTER_ID_TEMP = 402;
+	private static final int CLUSTER_ID_FLOW = 404;
+	private static final int CLUSTER_ID_SWITCH = 7;
+	private static final int CLUSTER_ID_TERMOSTAT = 201;
+	private static final int CLUSTER_ID_BASIC = 0;
 
 
 	public void run() 
@@ -71,7 +70,7 @@ public class DataDownloader extends Thread
 	{
 		return this.first_run;
 	}
-
+	
 	public void initialDownload() throws ConnectTimeoutException, ClientProtocolException, JSONException
 	{
 		JSONObject json = RestComm.restGet(URI);
@@ -90,10 +89,13 @@ public class DataDownloader extends Thread
 
 	public ArrayList<DataEntry> getByClusterId(int id)
 	{
+		int i = 0;
 		ArrayList<DataEntry> entry_list = new ArrayList<DataEntry>();
 		for (DataEntry d : dentry_list)
-			if (d.clusterID == id)
+			if (d.clusterID == id && i < 100) {
 				entry_list.add(d);
+				i++;
+			}
 		return entry_list;
 	}
 
@@ -129,9 +131,9 @@ public class DataDownloader extends Thread
 	{
 		parseLocations();
 		ArrayList<DataEntry> sensor_list = getDESensors();
-
+		
 		String db_entry = new String();
-		for (int i = 0; (i < sensor_list.size() && i < 200); i++)
+		for (int i = 0; (i < sensor_list.size()); i++)
 		{
 			DataEntry curr = sensor_list.get(i);
 			if (curr.extAddress.equalsIgnoreCase("null"))
@@ -177,9 +179,12 @@ public class DataDownloader extends Thread
 
 		String db_entry = new String();
 		Log.e("SENZOOOOOR SIZE", Integer.toString(sensor_list.size()));
-		for (int i = 0; (i < sensor_list.size() && i < 200); i++)
+		for (int i = 0; i < sensor_list.size(); i++)
 		{
 			DataEntry curr = sensor_list.get(i);
+			
+			if (curr.extAddress.equalsIgnoreCase("null"))
+				continue;
 			
 			String sensor_type = "nothing";
 			if (curr.clusterID == 402)
@@ -240,9 +245,22 @@ public class DataDownloader extends Thread
 		ArrayList<DataEntry> actuator_list = getDEActuators();
 
 		String db_entry = new String();
-		for (int i = 0; (i < actuator_list.size() && i < 200); i++)
+		for (int i = 0; (i < actuator_list.size() && i < 100); i++)
 		{
 			DataEntry curr = actuator_list.get(i);
+			
+			if (curr.extAddress.equalsIgnoreCase("null"))
+				continue;
+			
+			String first_attribute = curr.attributes.split(",")[0];
+			String hexa = first_attribute.substring(1, first_attribute.length()-1).split(":")[1];
+			int val = Integer.parseInt(hexa, 16);
+			String setting;
+			if (val == 0)
+				setting = "off";
+			else
+				setting = "on";
+			
 			if (i == 0)
 			{
 				db_entry += "SELECT " + Integer.toString(curr.id) + " AS '_ID', '" +
@@ -251,7 +269,7 @@ public class DataDownloader extends Thread
 				Integer.toString(curr.clusterID) + "' AS 'clusterID', '" +
 				extAddress_to_location.get(curr.extAddress) + "' AS 'location', '"+
 				Long.toString(curr.timestamp) + "' AS 'tstamp', '" +
-				curr.attributes + "' AS 'setting' ";
+				setting + "' AS 'setting' ";
 			}
 			else
 			{
@@ -261,7 +279,7 @@ public class DataDownloader extends Thread
 				Integer.toString(curr.clusterID) + "', '" +
 				extAddress_to_location.get(curr.extAddress) + "', '"+
 				Long.toString(curr.timestamp) + "', '" +
-				curr.attributes + "'";
+				setting + "'";
 			}
 
 		}
