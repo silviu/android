@@ -235,7 +235,7 @@ public class DataDownloader extends Thread
 	public ArrayList<DataEntry> getDEActuators()
 	{
 		ArrayList<DataEntry> actuator_list = new ArrayList<DataEntry>();
-		//actuator_list.addAll(getByClusterId(CLUSTER_ID_SWITCH));
+		actuator_list.addAll(getByClusterId(CLUSTER_ID_SWITCH));
 		actuator_list.addAll(getByClusterId(CLUSTER_ID_TERMOSTAT));
 		return actuator_list;
 	}
@@ -245,7 +245,7 @@ public class DataDownloader extends Thread
 		ArrayList<DataEntry> actuator_list = getDEActuators();
 
 		String db_entry = new String();
-		for (int i = 0; (i < actuator_list.size() && i < 100); i++)
+		for (int i = 0; i < actuator_list.size(); i++)
 		{
 			DataEntry curr = actuator_list.get(i);
 
