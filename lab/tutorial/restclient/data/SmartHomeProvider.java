@@ -125,7 +125,7 @@ public class SmartHomeProvider extends ContentProvider {
 			db.execSQL("DROP TABLE IF EXISTS "+DATABASE_TABLE_ACTUATORS);
 			db.execSQL("CREATE TABLE " + DATABASE_TABLE_ACTUATORS + " (" + _ID2 + 
 					   " INTEGER PRIMARY KEY AUTOINCREMENT," + 
-					   "extAddress text, endpoint text, clusterID text, timestamp timestamp, location text, setting text);");
+					   "extAddress text, endpoint text, clusterID text, location text, timestamp timestamp, setting text);");
 			try {
 				
 				//TODO: Add sensors, sensor values and acutuators to the databases

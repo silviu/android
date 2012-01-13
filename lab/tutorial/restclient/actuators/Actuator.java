@@ -8,15 +8,17 @@ abstract public class Actuator {
 		private String endpoint;
 		private String clusterID;
 		private Long timestamp;
+		private String location;
 		private String setting;
 		private String type;
 		
-		public Actuator(int id, String extAddress, String endpoint, String clusterID, Long timestamp, String setting, String type) {
+		public Actuator(int id, String extAddress, String endpoint, String clusterID, String location, Long timestamp ,String setting, String type) {
 			this.id = id;
 			this.setExtAddress(extAddress);
 			this.setEndpoint(endpoint);
 			this.setClusterID(clusterID);
 			this.setTimestamp(timestamp);
+			this.setLocation(location);
 			this.setSetting(setting);
 			this.type = type;
 		}
@@ -75,4 +77,11 @@ abstract public class Actuator {
 		public String getType() {
 			return type;
 		}	
+		public void setLocation(String location) {
+			this.location = location;
+		}
+
+		public String getLocation() {
+			return location;
+		}
 }

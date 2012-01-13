@@ -56,6 +56,7 @@ public class ActuatorsActivity extends Activity {
         						c.getString(c.getColumnIndex(SmartHomeProvider.extAddress)),
         						c.getString(c.getColumnIndex(SmartHomeProvider.endpoint)),
         						c.getString(c.getColumnIndex(SmartHomeProvider.clusterID)),
+        						c.getString(c.getColumnIndex(SmartHomeProvider.location)),
         						c.getLong(c.getColumnIndex(SmartHomeProvider.timestamp)),
         						c.getString(c.getColumnIndex(SmartHomeProvider.SETTING))));
         		
@@ -132,7 +133,7 @@ public class ActuatorsActivity extends Activity {
                         }
                         t = (TextView) v.findViewById(R.id.txtLocation);
                         if (t != null) {
-                              t.setText(o.getEndpoint());                            
+                              t.setText(o.getLocation());                            
                         }
                         t = (TextView) v.findViewById(R.id.txtValue);
                         if (t != null) {

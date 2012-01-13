@@ -220,8 +220,8 @@ public class DataDownloader extends Thread
 				curr.extAddress + "' AS 'extAddress', '" +
 				Integer.toString(curr.endpoint) + "' AS 'endpoint', '" +
 				Integer.toString(curr.clusterID) + "' AS 'clusterID', '" +
-				Long.toString(curr.timestamp) + "' AS 'timestamp', '" +
 				extAddress_to_location.get(curr.extAddress) + "' AS 'location', '"+
+				Long.toString(curr.timestamp) + "' AS 'timestamp', '" +
 				curr.attributes + "' AS 'setting' ";
 			}
 			else
@@ -230,8 +230,8 @@ public class DataDownloader extends Thread
 				curr.extAddress + "', '" +
 				Integer.toString(curr.endpoint) + "', '" +
 				Integer.toString(curr.clusterID) + "', '" +
-				Long.toString(curr.timestamp) + "', '" +
 				extAddress_to_location.get(curr.extAddress) + "', '"+
+				Long.toString(curr.timestamp) + "', '" +
 				curr.attributes + "'";
 			}
 

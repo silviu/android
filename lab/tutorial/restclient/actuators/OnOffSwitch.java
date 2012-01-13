@@ -9,8 +9,8 @@ public class OnOffSwitch extends Actuator {
 	public String onValue = "on";
 	public String offValue = "off";
 	
-	public OnOffSwitch(int id, String extAddress, String endpoint, String clusterID, Long timestamp, String setting) {
-		super(id, extAddress, endpoint, clusterID, timestamp, setting, ActuatorConstants.ONOFF);
+	public OnOffSwitch(int id, String extAddress, String endpoint, String clusterID, String location, Long timestamp, String setting) {
+		super(id, extAddress, endpoint, clusterID,location, timestamp, setting, ActuatorConstants.ONOFF);
 		if (setting.equalsIgnoreCase(onValue)) this.setting=true;
 		else this.setting = false;
 	}
