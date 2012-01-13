@@ -8,13 +8,15 @@ abstract public class Sensor {
 		private String extAddress;
 		private String endpoint;
 		private String clusterID;
+		String location;
 		private String type;
 		
-		public Sensor(int id, String extAddress, String endpoint, String clusterID, String type) {
+		public Sensor(int id, String extAddress, String endpoint, String clusterID, String location, String type) {
 			this.id = id;
 			this.setExtAddress(extAddress);
 			this.setEndpoint(endpoint);
 			this.setClusterID(clusterID);
+			this.setLocation(location);
 			this.type = type;
 		}
 		
@@ -53,6 +55,14 @@ abstract public class Sensor {
 
 		public String getClusterID() {
 			return clusterID;
+		}
+		
+		public void setLocation(String location) {
+			this.location = location;
+		}
+
+		public String getLocation() {
+			return location;
 		}
 
 		

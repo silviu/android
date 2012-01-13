@@ -43,6 +43,8 @@ public class SmartHomeProvider extends ContentProvider {
 	public static final String endpoint = "endpoint";
 	public static final String clusterID = "clusterID";
 	public static final String timestamp = "timestamp";
+	public static final String location = "location";
+
 	
 	//for sensor values
 	public static final String _ID2 = "_id";
@@ -111,7 +113,7 @@ public class SmartHomeProvider extends ContentProvider {
 			db.execSQL("DROP TABLE IF EXISTS "+DATABASE_TABLE_SENSORS);
 			db.execSQL("CREATE TABLE " + DATABASE_TABLE_SENSORS + " (" + _ID1 + 
 					   " INTEGER PRIMARY KEY AUTOINCREMENT," + 
-					   "extAddress text, endpoint text, clusterID text);");
+					   "extAddress text, endpoint text, clusterID text, location text);");
 			
 			
 			db.execSQL("DROP TABLE IF EXISTS "+DATABASE_TABLE_SENSORVALUES);
@@ -123,7 +125,7 @@ public class SmartHomeProvider extends ContentProvider {
 			db.execSQL("DROP TABLE IF EXISTS "+DATABASE_TABLE_ACTUATORS);
 			db.execSQL("CREATE TABLE " + DATABASE_TABLE_ACTUATORS + " (" + _ID2 + 
 					   " INTEGER PRIMARY KEY AUTOINCREMENT," + 
-					   "extAddress text, endpoint text, clusterID text, timestamp timestamp, setting text);");
+					   "extAddress text, endpoint text, clusterID text, timestamp timestamp, location text, setting text);");
 			try {
 				
 				//TODO: Add sensors, sensor values and acutuators to the databases
@@ -145,17 +147,6 @@ public class SmartHomeProvider extends ContentProvider {
 				Log.d("DatabaseDownloader", "Exceptie la adaugare in baza de date");
 			}
 		}
-		public static void waiting (int n){
-	        
-	        long t0, t1;
-
-	        t0 =  System.currentTimeMillis();
-
-	        do{
-	            t1 = System.currentTimeMillis();
-	        }
-	        while ((t1 - t0) < (n * 1000));
-	    }
 
 		@Override
 		public void onUpgrade(SQLiteDatabase db, int oldVersion, 

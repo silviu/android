@@ -73,7 +73,9 @@ public class SensorsActivity extends Activity {
         		senzori.add( new TemperatureSensor(c.getInt(c.getColumnIndex(SmartHomeProvider._ID1)), 
         						c.getString(c.getColumnIndex(SmartHomeProvider.extAddress)),
         						c.getString(c.getColumnIndex(SmartHomeProvider.endpoint)),
-        						c.getString(c.getColumnIndex(SmartHomeProvider.clusterID))));
+        						c.getString(c.getColumnIndex(SmartHomeProvider.clusterID)),
+        						c.getString(c.getColumnIndex(SmartHomeProvider.location))
+        						));
         	} while (c.moveToNext());
         }
         
@@ -85,7 +87,7 @@ public class SensorsActivity extends Activity {
         		//dar eu am un String attributes
         
         // What happens when you click a button in the Sensor list
-       /* lv.setOnItemClickListener(new OnItemClickListener() {
+        lv.setOnItemClickListener(new OnItemClickListener() {
     	    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
     	    	flipper.showNext();
     	    	TemperatureSensor s = (TemperatureSensor)senzori.get(position);
@@ -98,13 +100,12 @@ public class SensorsActivity extends Activity {
     	        	do{
     	        		// Difference between SQL Timestamp and Java Timestamp, got to *1000
     	        		timestamps[i] = new Long(c.getLong(c.getColumnIndex(SmartHomeProvider.timestamp))*1000);
-    	        		values[i] = new Double(c.getDouble(c.getColumnIndex(SmartHomeProvider.VALUE)));
+    	        		values[i] = new Double(c.getDouble(c.getColumnIndex(SmartHomeProvider.attributes)));
     	        	} while (c.moveToNext() && ++i<5);
     	        }
     	    	createChart(timestamps, values, s);
     	    }
         });
-        */
     }
     
     private void createChart(Number[] timestamps, Number[] values, TemperatureSensor s){
@@ -215,7 +216,7 @@ public class SensorsActivity extends Activity {
                         }
                         t = (TextView) v.findViewById(R.id.txtLocation);
                         if (t != null) {
-                              t.setText(s.getEndpoint());                            
+                              t.setText(s.getLocation());                            
                         }
                         t = (TextView) v.findViewById(R.id.txtValue);
                         if (t != null) {

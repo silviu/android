@@ -1,6 +1,8 @@
 package lab.tutorial.restclient.data;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 import lab.tutorial.restclient.RestComm;
 import org.apache.http.client.ClientProtocolException;
@@ -35,11 +37,14 @@ public class DataDownloader extends Thread
 	private Boolean first_run = true;
 	private String URI = "http://embedded.cs.pub.ro/si/zigbee/status";
 	public ArrayList<DataEntry> dentry_list = new ArrayList<DataEntry>();
+	Map<String, String> extAddress_to_location = new HashMap<String, String>();
+
 
 	public static final int CLUSTER_ID_TEMP = 402;
 	public static final int CLUSTER_ID_FLOW = 404;
 	public static final int CLUSTER_ID_SWITCH = 7;
 	public static final int CLUSTER_ID_TERMOSTAT = 201;
+	public static final int CLUSTER_ID_BASIC = 0;
 
 
 	public void run() 
@@ -49,7 +54,7 @@ public class DataDownloader extends Thread
 			while(true) {
 
 				Thread.sleep(100000);
-				
+
 				if (first_run) {
 					initialDownload();
 					first_run = false;
@@ -61,12 +66,12 @@ public class DataDownloader extends Thread
 			Log.e("GetStatus", "run", e);
 		}
 	}
-	
+
 	public Boolean is_first_time()
 	{
 		return this.first_run;
 	}
-	
+
 	public void initialDownload() throws ConnectTimeoutException, ClientProtocolException, JSONException
 	{
 		JSONObject json = RestComm.restGet(URI);
@@ -81,7 +86,7 @@ public class DataDownloader extends Thread
 			catch(Exception e){}
 		}
 	}
-	
+
 
 	public ArrayList<DataEntry> getByClusterId(int id)
 	{
@@ -92,20 +97,39 @@ public class DataDownloader extends Thread
 		return entry_list;
 	}
 
-	
+	public ArrayList<DataEntry> getDEBasicClusters()
+	{
+		ArrayList<DataEntry> basic_clusters = new ArrayList<DataEntry>();
+		basic_clusters.addAll(getByClusterId(CLUSTER_ID_BASIC));
+		return basic_clusters;
+	}
+
 	public ArrayList<DataEntry> getDESensors()
 	{
 		ArrayList<DataEntry> sensor_list = new ArrayList<DataEntry>();
 		sensor_list.addAll(getByClusterId(CLUSTER_ID_TEMP));
 		sensor_list.addAll(getByClusterId(CLUSTER_ID_FLOW));
-		
+
 		return sensor_list;
 	}
-	
+
+	public void parseLocations()
+	{
+		ArrayList<DataEntry> sensor_list = getDEBasicClusters();
+		for (DataEntry sensor : sensor_list)
+		{
+			String[] split1 = sensor.attributes.split(",");
+			String[] split2 = split1[2].substring(1, split1[2].length()-1).split(":");
+			String location = split2[1];
+			extAddress_to_location.put(sensor.extAddress, location);
+		}
+	}
+
 	public String getDBSensors()
 	{
+		parseLocations();
 		ArrayList<DataEntry> sensor_list = getDESensors();
-		
+
 		String db_entry = new String();
 		for (int i = 0; (i < sensor_list.size() && i < 50); i++)
 		{
@@ -113,58 +137,63 @@ public class DataDownloader extends Thread
 			if (i == 0)
 			{
 				db_entry += "SELECT " + Integer.toString(curr.id) + " AS '_ID', '" +
-										curr.extAddress + "' AS 'extAddress', '" +
-										Integer.toString(curr.endpoint) + "' AS 'endpoint', '" +
-										Integer.toString(curr.clusterID) + "' AS 'clusterID' ";
+				curr.extAddress + "' AS 'extAddress', '" +
+				Integer.toString(curr.endpoint) + "' AS 'endpoint', '" +
+				Integer.toString(curr.clusterID) + "' AS 'clusterID', '" +
+				extAddress_to_location.get(curr.extAddress) + "' AS 'location' ";
 			}
 			else
 			{
 				db_entry += "UNION SELECT  " +  Integer.toString(curr.id) + " AS '_ID', '" +
-												curr.extAddress + "', '" +
-												Integer.toString(curr.endpoint) + "', '" +
-												Integer.toString(curr.clusterID) + "'";
+				curr.extAddress + "', '" +
+				Integer.toString(curr.endpoint) + "', '" +
+				Integer.toString(curr.clusterID) + "', '" +
+				extAddress_to_location.get(curr.extAddress) + "'";
+
 			}
-		
+
 		}
 		return db_entry;
 	}
-	
 
-	
+
 	public String getDBSensorValues()
 	{
 		ArrayList<DataEntry> sensor_list = getDESensors();
-		
+
 		String db_entry = new String();
+		Log.e("SENZOOOOOR SIZE", Integer.toString(sensor_list.size()));
 		for (int i = 0; (i < sensor_list.size() && i < 50); i++)
 		{
 			DataEntry curr = sensor_list.get(i);
-			
+
 			String no_accolades = curr.attributes.substring(1, curr.attributes.length()-1);
-			
 			String[] split_values = no_accolades.split(":");
 			String str_val = split_values[1];
-			
-			int val = Integer.parseInt(str_val, 16)/100;
-			Log.e("SENSOOOOOOOOOOOOOOOOOOOOOZ", split_values[1]);
+			int val = 0;
+			if (curr.clusterID == 402)
+				val = Integer.parseInt(str_val, 16)/100;
+			else
+				val = Integer.parseInt(str_val, 16)/10;
+
 			if (i == 0)
 			{
 				db_entry += "SELECT " + Integer.toString(curr.id) + " AS '_ID', '" +
-										curr.extAddress + "' AS 'extAddress', '" +
-										Integer.toString(curr.endpoint) + "' AS 'endpoint', '" +
-										Integer.toString(val) + "' AS 'attributes', '" +
-										Long.toString(curr.timestamp) + "' AS 'timestamp' ";
+				curr.extAddress + "' AS 'extAddress', '" +
+				Integer.toString(curr.endpoint) + "' AS 'endpoint', '" +
+				Integer.toString(val) + "' AS 'attributes', '" +
+				Long.toString(curr.timestamp) + "' AS 'timestamp' ";
 
 			}
 			else
 			{
 				db_entry += "UNION SELECT  " +  Integer.toString(curr.id) + " AS '_ID', '" +
-												curr.extAddress + "', '" +
-												Integer.toString(curr.endpoint) + "', '" +
-												Integer.toString(val) + "', '" +
-												Long.toString(curr.timestamp) + "'";
+				curr.extAddress + "', '" +
+				Integer.toString(curr.endpoint) + "', '" +
+				Integer.toString(val) + "', '" +
+				Long.toString(curr.timestamp) + "'";
 			}	
-		
+
 		}
 		return db_entry;
 	}
@@ -180,7 +209,7 @@ public class DataDownloader extends Thread
 	public String getDBActuators()
 	{
 		ArrayList<DataEntry> actuator_list = getDEActuators();
-		
+
 		String db_entry = new String();
 		for (int i = 0; (i < actuator_list.size() && i < 500); i++)
 		{
@@ -188,22 +217,24 @@ public class DataDownloader extends Thread
 			if (i == 0)
 			{
 				db_entry += "SELECT " + Integer.toString(curr.id) + " AS '_ID', '" +
-										curr.extAddress + "' AS 'extAddress', '" +
-										Integer.toString(curr.endpoint) + "' AS 'endpoint', '" +
-										Integer.toString(curr.clusterID) + "' AS 'clusterID', '" +
-										Long.toString(curr.timestamp) + "' AS 'timestamp', '" +
-										curr.attributes + "' AS 'setting' ";
+				curr.extAddress + "' AS 'extAddress', '" +
+				Integer.toString(curr.endpoint) + "' AS 'endpoint', '" +
+				Integer.toString(curr.clusterID) + "' AS 'clusterID', '" +
+				Long.toString(curr.timestamp) + "' AS 'timestamp', '" +
+				extAddress_to_location.get(curr.extAddress) + "' AS 'location', '"+
+				curr.attributes + "' AS 'setting' ";
 			}
 			else
 			{
 				db_entry += "UNION SELECT  " +  Integer.toString(curr.id) + " AS '_ID', '" +
-												curr.extAddress + "', '" +
-												Integer.toString(curr.endpoint) + "', '" +
-												Integer.toString(curr.clusterID) + "', '" +
-												Long.toString(curr.timestamp) + "', '" +
-												curr.attributes + "'";
+				curr.extAddress + "', '" +
+				Integer.toString(curr.endpoint) + "', '" +
+				Integer.toString(curr.clusterID) + "', '" +
+				Long.toString(curr.timestamp) + "', '" +
+				extAddress_to_location.get(curr.extAddress) + "', '"+
+				curr.attributes + "'";
 			}
-		
+
 		}
 		return db_entry;
 	}

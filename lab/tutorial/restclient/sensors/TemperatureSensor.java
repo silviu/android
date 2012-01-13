@@ -5,8 +5,8 @@ public class TemperatureSensor extends Sensor {
 	
 	private String unit = "°C";
 	
-	public TemperatureSensor(int id, String extAddress, String endpoint, String clusterID) {
-		super(id, extAddress, endpoint, clusterID, SensorConstants.TEMPERATURE);
+	public TemperatureSensor(int id, String extAddress, String endpoint, String clusterID, String location) {
+		super(id, extAddress, endpoint, clusterID, location, SensorConstants.TEMPERATURE);
 	}
 	
 	public String getUnit() {
