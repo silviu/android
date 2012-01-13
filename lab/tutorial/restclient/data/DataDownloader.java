@@ -149,7 +149,9 @@ public class DataDownloader extends Thread
 				Integer.toString(curr.endpoint) + "' AS 'endpoint', '" +
 				Integer.toString(curr.clusterID) + "' AS 'clusterID', '" +
 				extAddress_to_location.get(curr.extAddress) + "' AS 'location', '"+
-				sensor_type + "' AS 'type' ";
+				sensor_type + "' AS 'type', '" +
+				Long.toString(curr.timestamp) + "' AS 'tstamp' ";
+
 			}
 			else
 			{
@@ -158,7 +160,9 @@ public class DataDownloader extends Thread
 				Integer.toString(curr.endpoint) + "', '" +
 				Integer.toString(curr.clusterID) + "', '" +
 				extAddress_to_location.get(curr.extAddress) + "', '"+
-				sensor_type + "'";
+				sensor_type + "', '" + 
+				Long.toString(curr.timestamp) + "'";
+
 
 			}
 
@@ -206,7 +210,7 @@ public class DataDownloader extends Thread
 				Integer.toString(curr.endpoint) + "' AS 'endpoint', '" +
 				Double.toString(val) + "' AS 'attributes', '" +
 				sensor_type + "' AS 'type', '" +
-				Long.toString(curr.timestamp) + "' AS 'timestamp' ";
+				Long.toString(curr.timestamp) + "' AS 'tstamp' ";
 
 			}
 			else
@@ -236,7 +240,7 @@ public class DataDownloader extends Thread
 		ArrayList<DataEntry> actuator_list = getDEActuators();
 
 		String db_entry = new String();
-		for (int i = 0; (i < actuator_list.size() && i < 500); i++)
+		for (int i = 0; (i < actuator_list.size() && i < 200); i++)
 		{
 			DataEntry curr = actuator_list.get(i);
 			if (i == 0)
@@ -246,7 +250,7 @@ public class DataDownloader extends Thread
 				Integer.toString(curr.endpoint) + "' AS 'endpoint', '" +
 				Integer.toString(curr.clusterID) + "' AS 'clusterID', '" +
 				extAddress_to_location.get(curr.extAddress) + "' AS 'location', '"+
-				Long.toString(curr.timestamp) + "' AS 'timestamp', '" +
+				Long.toString(curr.timestamp) + "' AS 'tstamp', '" +
 				curr.attributes + "' AS 'setting' ";
 			}
 			else

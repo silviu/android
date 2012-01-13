@@ -76,14 +76,18 @@ public class SensorsActivity extends Activity {
         						c.getString(c.getColumnIndex(SmartHomeProvider.extAddress)),
         						c.getString(c.getColumnIndex(SmartHomeProvider.endpoint)),
         						c.getString(c.getColumnIndex(SmartHomeProvider.clusterID)),
-        						c.getString(c.getColumnIndex(SmartHomeProvider.location))
+        						c.getString(c.getColumnIndex(SmartHomeProvider.location)),
+        						c.getLong(c.getColumnIndex(SmartHomeProvider.timestamp))
+
         						));
         		else
         			senzori.add( new FlowSensor(c.getInt(c.getColumnIndex(SmartHomeProvider._ID1)), 
     						c.getString(c.getColumnIndex(SmartHomeProvider.extAddress)),
     						c.getString(c.getColumnIndex(SmartHomeProvider.endpoint)),
     						c.getString(c.getColumnIndex(SmartHomeProvider.clusterID)),
-    						c.getString(c.getColumnIndex(SmartHomeProvider.location))
+    						c.getString(c.getColumnIndex(SmartHomeProvider.location)),
+    						c.getLong(c.getColumnIndex(SmartHomeProvider.timestamp))
+
     						));
         	} while (c.moveToNext());
         }
@@ -219,11 +223,12 @@ public class SensorsActivity extends Activity {
                 
                 Sensor s = items.get(position);
                 Uri allSensors = Uri.parse(provider+"/sensors");
+            //    String[] columns_sensor = {"max(tstamp)", "clusterID", "endpoint", "extAddress", "location", "type"};
                 Cursor c_sensor = managedQuery(allSensors, null, null, null, null);
                 if (s != null) {
                         TextView t = (TextView) v.findViewById(R.id.txtName);
                         if (t != null) {
-                              t.setText(s.getExtAddress());                            
+                              t.setText(Long.toString(s.getTimestamp()));                            
                         }
                         t = (TextView) v.findViewById(R.id.txtLocation);
                         if (t != null) {
@@ -232,7 +237,7 @@ public class SensorsActivity extends Activity {
                         t = (TextView) v.findViewById(R.id.txtValue);
                         if (t != null) {
                         		Uri sensorValue = Uri.parse(provider+"/value/"+s.getId());
-                        		String[] columns = {"max(timestamp)","attributes"};
+                        		String[] columns = {"tstamp","attributes"};
                         		Cursor c = managedQuery(sensorValue, columns, null, null, null);
                         		
                         		if (c.moveToFirst()) {

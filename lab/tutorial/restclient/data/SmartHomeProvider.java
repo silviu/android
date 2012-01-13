@@ -42,7 +42,7 @@ public class SmartHomeProvider extends ContentProvider {
 	public static final String extAddress = "extAddress";
 	public static final String endpoint = "endpoint";
 	public static final String clusterID = "clusterID";
-	public static final String timestamp = "timestamp";
+	public static final String timestamp = "tstamp";
 	public static final String location = "location";
 	public static final String type = "type";
 
@@ -115,19 +115,19 @@ public class SmartHomeProvider extends ContentProvider {
 			db.execSQL("DROP TABLE IF EXISTS "+DATABASE_TABLE_SENSORS);
 			db.execSQL("CREATE TABLE " + DATABASE_TABLE_SENSORS + " (" + _ID1 + 
 					   " INTEGER PRIMARY KEY AUTOINCREMENT," + 
-					   "extAddress text, endpoint text, clusterID text, location text, type text);");
+					   "extAddress text, endpoint text, clusterID text, location text, type text, tstamp timestamp);");
 			
 			
 			db.execSQL("DROP TABLE IF EXISTS "+DATABASE_TABLE_SENSORVALUES);
 			db.execSQL("CREATE TABLE " + DATABASE_TABLE_SENSORVALUES + " (" + _ID2 + 
 					   " INTEGER PRIMARY KEY AUTOINCREMENT," + 
-					   "extAddress text, endpoint text, attributes text, type text, timestamp timestamp);");
+					   "extAddress text, endpoint text, attributes text, type text, tstamp timestamp);");
 			
 			
 			db.execSQL("DROP TABLE IF EXISTS "+DATABASE_TABLE_ACTUATORS);
 			db.execSQL("CREATE TABLE " + DATABASE_TABLE_ACTUATORS + " (" + _ID2 + 
 					   " INTEGER PRIMARY KEY AUTOINCREMENT," + 
-					   "extAddress text, endpoint text, clusterID text, location text, timestamp timestamp, setting text);");
+					   "extAddress text, endpoint text, clusterID text, location text, tstamp timestamp, setting text);");
 			try {
 				
 				//TODO: Add sensors, sensor values and acutuators to the databases
@@ -202,12 +202,12 @@ public class SmartHomeProvider extends ContentProvider {
 		switch (uriMatcher.match(uri)){
 		case SENSORS:
 			sqlBuilder.setTables(DATABASE_TABLE_SENSORS);
-			if (sortOrder==null || sortOrder=="") sortOrder = _ID1;
+			if (sortOrder==null || sortOrder=="") sortOrder = timestamp + " DESC";
 			break;
 		case SENSORVALUES:
 			sqlBuilder.setTables(DATABASE_TABLE_SENSORVALUES);
 			sqlBuilder.appendWhere(_ID3 + " = " + uri.getPathSegments().get(1));
-			if (sortOrder==null || sortOrder=="") sortOrder = timestamp;
+			if (sortOrder==null || sortOrder=="") sortOrder = timestamp + " DESC";
 			break;
 		case CURRENTVALUE:
 			sqlBuilder.setTables(DATABASE_TABLE_SENSORVALUES);
@@ -215,7 +215,7 @@ public class SmartHomeProvider extends ContentProvider {
 			break;
 		case ACTUATORS:
 			sqlBuilder.setTables(DATABASE_TABLE_ACTUATORS);
-			if (sortOrder==null || sortOrder=="") sortOrder = _ID3;
+			if (sortOrder==null || sortOrder=="") sortOrder = timestamp + " DESC";
 			break;
 		default: throw new SQLException("Failed to process " + uri);
 		}
