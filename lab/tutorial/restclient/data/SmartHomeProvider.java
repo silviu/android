@@ -134,13 +134,8 @@ public class SmartHomeProvider extends ContentProvider {
 			db.execSQL("DROP TABLE IF EXISTS "+DATABASE_TABLE_ACTUATORS);
 			db.execSQL("CREATE TABLE " + DATABASE_TABLE_ACTUATORS + " (" + _ID2 + 
 					" INTEGER PRIMARY KEY AUTOINCREMENT," + 
-			"extAddress text, endpoint text, clusterID text, location text, tstamp timestamp, setting text);");
+			"extAddress text, endpoint text, clusterID text, location text, type text, tstamp timestamp, setting text);");
 			try {
-
-				//TODO: Add sensors, sensor values and acutuators to the databases
-				// pentru ca metoda asta e apelata o singura data cand e creata aplicatia/baza de date
-				// aici pot apela initialdownload()
-
 
 				Log.d("SMARTHOMEPROVIDER", "ADDING DATA TO DATABASE");
 				String senzori = downl.getDBSensors();

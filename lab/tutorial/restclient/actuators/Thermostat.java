@@ -1,6 +1,8 @@
 // This class describes an Termostat Switch actuator
 package lab.tutorial.restclient.actuators;
 
+import android.util.Log;
+
 public class Thermostat extends Actuator {
 	
 	private double minVal;
@@ -13,17 +15,10 @@ public class Thermostat extends Actuator {
 	
 	private void setMinMaxVal(String setting)
 	{
-		//[{0015:6eb},{0016:cb}]
-		String common = setting.substring(2, setting.length()-2);
-		String min_partial = common.split(",")[0].split(":")[1];
-		String min_str = min_partial.substring(0, min_partial.length()-1);
-		double min = ((double)Integer.parseInt(min_str, 16))/100;
-		setminVal(min);
-		
-		String max_partial = common.split(",")[1];
-		String max_str = max_partial.split(":")[1];
-		double max = ((double)Integer.parseInt(max_str, 16))/100;
-		setmaxVal(max);
+		String min = setting.split("#")[0];
+		String max = setting.split("#")[1];
+		setminVal(Double.parseDouble(min));
+		setminVal(Double.parseDouble(max));
 	}
 	
 	public double getminVal(){

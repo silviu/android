@@ -70,7 +70,7 @@ public class DataDownloader extends Thread
 	{
 		return this.first_run;
 	}
-	
+
 	public void initialDownload() throws ConnectTimeoutException, ClientProtocolException, JSONException
 	{
 		JSONObject json = RestComm.restGet(URI);
@@ -131,14 +131,14 @@ public class DataDownloader extends Thread
 	{
 		parseLocations();
 		ArrayList<DataEntry> sensor_list = getDESensors();
-		
+
 		String db_entry = new String();
 		for (int i = 0; (i < sensor_list.size()); i++)
 		{
 			DataEntry curr = sensor_list.get(i);
 			if (curr.extAddress.equalsIgnoreCase("null"))
 				continue;
-			
+
 			String sensor_type = "nothing";
 			if (curr.clusterID == 402)
 				sensor_type = "temperature";
@@ -182,17 +182,17 @@ public class DataDownloader extends Thread
 		for (int i = 0; i < sensor_list.size(); i++)
 		{
 			DataEntry curr = sensor_list.get(i);
-			
+
 			if (curr.extAddress.equalsIgnoreCase("null"))
 				continue;
-			
+
 			String sensor_type = "nothing";
 			if (curr.clusterID == 402)
 				sensor_type = "temperature";
 			else if (curr.clusterID == 404)
 				sensor_type = "flow";
-			
-			
+
+
 
 			String no_accolades = curr.attributes.substring(1, curr.attributes.length()-1);
 			String[] split_values = no_accolades.split(":");
@@ -235,7 +235,7 @@ public class DataDownloader extends Thread
 	public ArrayList<DataEntry> getDEActuators()
 	{
 		ArrayList<DataEntry> actuator_list = new ArrayList<DataEntry>();
-		actuator_list.addAll(getByClusterId(CLUSTER_ID_SWITCH));
+		//actuator_list.addAll(getByClusterId(CLUSTER_ID_SWITCH));
 		actuator_list.addAll(getByClusterId(CLUSTER_ID_TERMOSTAT));
 		return actuator_list;
 	}
@@ -248,18 +248,51 @@ public class DataDownloader extends Thread
 		for (int i = 0; (i < actuator_list.size() && i < 100); i++)
 		{
 			DataEntry curr = actuator_list.get(i);
-			
+
 			if (curr.extAddress.equalsIgnoreCase("null"))
 				continue;
-			
-			String first_attribute = curr.attributes.split(",")[0];
-			String hexa = first_attribute.substring(1, first_attribute.length()-1).split(":")[1];
-			int val = Integer.parseInt(hexa, 16);
+
 			String setting;
-			if (val == 0)
-				setting = "off";
+			String actuator_type;
+			//on/off switch
+			if (curr.clusterID == CLUSTER_ID_SWITCH)
+			{
+				String first_attribute = curr.attributes.split(",")[0];
+				String hexa = first_attribute.substring(1, first_attribute.length()-1).split(":")[1];
+				int val = Integer.parseInt(hexa, 16);
+				if (val == 0)
+					setting = "off";
+				else
+					setting = "on";
+				actuator_type = "switch";
+			}
+			// Thermostat
 			else
-				setting = "on";
+			{
+				String thermostat_attribute = curr.attributes;
+				Log.e("THERMOSTAT ATTRIBUTE", thermostat_attribute);
+				String common = thermostat_attribute.substring(2, thermostat_attribute.length()-2);
+				Log.e("THERMOSTAT common", common);
+
+				String[] min_partial = common.split(",");
+				if (min_partial.length < 2)
+					continue;
+				String good = min_partial[0].split(":")[1];
+				Log.e("THERMOSTAT min_partial", good);
+
+				String min_str = good.substring(0, good.length()-1);
+				Log.e("THERMOSTAT min_str", min_str);
+
+				double min = ((double)Integer.parseInt(min_str, 16))/100;
+				
+				String max_partial = common.split(",")[1];
+				String max_str = max_partial.split(":")[1];
+				double max = ((double)Integer.parseInt(max_str, 16))/100;
+				
+				setting = Double.toString(min) + "#" + Double.toString(max);
+				actuator_type = "thermostat";
+
+			}
 			
 			if (i == 0)
 			{
@@ -268,6 +301,7 @@ public class DataDownloader extends Thread
 				Integer.toString(curr.endpoint) + "' AS 'endpoint', '" +
 				Integer.toString(curr.clusterID) + "' AS 'clusterID', '" +
 				extAddress_to_location.get(curr.extAddress) + "' AS 'location', '"+
+				actuator_type + "' AS 'type', '" +
 				Long.toString(curr.timestamp) + "' AS 'tstamp', '" +
 				setting + "' AS 'setting' ";
 			}
@@ -278,6 +312,7 @@ public class DataDownloader extends Thread
 				Integer.toString(curr.endpoint) + "', '" +
 				Integer.toString(curr.clusterID) + "', '" +
 				extAddress_to_location.get(curr.extAddress) + "', '"+
+				actuator_type + "', '" +
 				Long.toString(curr.timestamp) + "', '" +
 				setting + "'";
 			}
