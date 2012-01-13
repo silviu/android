@@ -111,13 +111,13 @@ public class SmartHomeProvider extends ContentProvider {
 			db.execSQL("DROP TABLE IF EXISTS "+DATABASE_TABLE_SENSORS);
 			db.execSQL("CREATE TABLE " + DATABASE_TABLE_SENSORS + " (" + _ID1 + 
 					   " INTEGER PRIMARY KEY AUTOINCREMENT," + 
-					   "extAddress text, endpoint text, clusterID text, timestamp timestamp);");
+					   "extAddress text, endpoint text, clusterID text);");
 			
 			
 			db.execSQL("DROP TABLE IF EXISTS "+DATABASE_TABLE_SENSORVALUES);
 			db.execSQL("CREATE TABLE " + DATABASE_TABLE_SENSORVALUES + " (" + _ID2 + 
 					   " INTEGER PRIMARY KEY AUTOINCREMENT," + 
-					   "extAddress text, endpoint text, attributes text);");
+					   "extAddress text, endpoint text, attributes text, timestamp timestamp);");
 			
 			
 			db.execSQL("DROP TABLE IF EXISTS "+DATABASE_TABLE_ACTUATORS);

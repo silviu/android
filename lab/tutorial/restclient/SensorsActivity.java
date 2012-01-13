@@ -73,8 +73,7 @@ public class SensorsActivity extends Activity {
         		senzori.add( new TemperatureSensor(c.getInt(c.getColumnIndex(SmartHomeProvider._ID1)), 
         						c.getString(c.getColumnIndex(SmartHomeProvider.extAddress)),
         						c.getString(c.getColumnIndex(SmartHomeProvider.endpoint)),
-        						c.getString(c.getColumnIndex(SmartHomeProvider.clusterID)),
-        						c.getLong(c.getColumnIndex(SmartHomeProvider.timestamp))));
+        						c.getString(c.getColumnIndex(SmartHomeProvider.clusterID))));
         	} while (c.moveToNext());
         }
         
@@ -218,16 +217,16 @@ public class SensorsActivity extends Activity {
                         if (t != null) {
                               t.setText(s.getEndpoint());                            
                         }
-                        /*t = (TextView) v.findViewById(R.id.txtValue);
+                        t = (TextView) v.findViewById(R.id.txtValue);
                         if (t != null) {
                         		Uri sensorValue = Uri.parse(provider+"/value/"+s.getId());
-                        		String[] columns = {"max(timestamp)","value"};
+                        		String[] columns = {"max(timestamp)","attributes"};
                         		Cursor c = managedQuery(sensorValue, columns, null, null, null);
                         		if (c.moveToFirst()) {
-                        			t.setText(c.getDouble(c.getColumnIndex("value"))+((TemperatureSensor)s).getUnit());                            
+                        			t.setText(c.getDouble(c.getColumnIndex("attributes"))+((TemperatureSensor)s).getUnit());                            
                         		}
                         }
-                        */
+                        
                         ImageView i = (ImageView) v.findViewById(R.id.img);
                         if (i != null) {
                         	if (s.getType()==SensorConstants.TEMPERATURE) {

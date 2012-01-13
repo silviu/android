@@ -107,7 +107,7 @@ public class DataDownloader extends Thread
 		ArrayList<DataEntry> sensor_list = getDESensors();
 		
 		String db_entry = new String();
-		for (int i = 0; (i < sensor_list.size() && i < 500); i++)
+		for (int i = 0; (i < sensor_list.size() && i < 50); i++)
 		{
 			DataEntry curr = sensor_list.get(i);
 			if (i == 0)
@@ -115,16 +115,14 @@ public class DataDownloader extends Thread
 				db_entry += "SELECT " + Integer.toString(curr.id) + " AS '_ID', '" +
 										curr.extAddress + "' AS 'extAddress', '" +
 										Integer.toString(curr.endpoint) + "' AS 'endpoint', '" +
-										Integer.toString(curr.clusterID) + "' AS 'clusterID', '" +
-										Long.toString(curr.timestamp) + "' AS 'timestamp' ";
+										Integer.toString(curr.clusterID) + "' AS 'clusterID' ";
 			}
 			else
 			{
 				db_entry += "UNION SELECT  " +  Integer.toString(curr.id) + " AS '_ID', '" +
 												curr.extAddress + "', '" +
 												Integer.toString(curr.endpoint) + "', '" +
-												Integer.toString(curr.clusterID) + "', '" +
-												Long.toString(curr.timestamp) + "'";
+												Integer.toString(curr.clusterID) + "'";
 			}
 		
 		}
@@ -138,22 +136,33 @@ public class DataDownloader extends Thread
 		ArrayList<DataEntry> sensor_list = getDESensors();
 		
 		String db_entry = new String();
-		for (int i = 0; (i < sensor_list.size() && i < 500); i++)
+		for (int i = 0; (i < sensor_list.size() && i < 50); i++)
 		{
 			DataEntry curr = sensor_list.get(i);
+			
+			String no_accolades = curr.attributes.substring(1, curr.attributes.length()-1);
+			
+			String[] split_values = no_accolades.split(":");
+			String str_val = split_values[1];
+			
+			int val = Integer.parseInt(str_val, 16)/100;
+			Log.e("SENSOOOOOOOOOOOOOOOOOOOOOZ", split_values[1]);
 			if (i == 0)
 			{
 				db_entry += "SELECT " + Integer.toString(curr.id) + " AS '_ID', '" +
 										curr.extAddress + "' AS 'extAddress', '" +
 										Integer.toString(curr.endpoint) + "' AS 'endpoint', '" +
-										curr.attributes + "' AS 'attributes' ";
+										Integer.toString(val) + "' AS 'attributes', '" +
+										Long.toString(curr.timestamp) + "' AS 'timestamp' ";
+
 			}
 			else
 			{
 				db_entry += "UNION SELECT  " +  Integer.toString(curr.id) + " AS '_ID', '" +
 												curr.extAddress + "', '" +
 												Integer.toString(curr.endpoint) + "', '" +
-												curr.attributes + "'";
+												Integer.toString(val) + "', '" +
+												Long.toString(curr.timestamp) + "'";
 			}	
 		
 		}

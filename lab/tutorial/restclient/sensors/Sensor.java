@@ -8,15 +8,13 @@ abstract public class Sensor {
 		private String extAddress;
 		private String endpoint;
 		private String clusterID;
-		private Long timestamp;
 		private String type;
 		
-		public Sensor(int id, String extAddress, String endpoint, String clusterID, Long timestamp, String type) {
+		public Sensor(int id, String extAddress, String endpoint, String clusterID, String type) {
 			this.id = id;
 			this.setExtAddress(extAddress);
 			this.setEndpoint(endpoint);
 			this.setClusterID(clusterID);
-			this.setTimestamp(timestamp);
 			this.type = type;
 		}
 		
@@ -57,12 +55,5 @@ abstract public class Sensor {
 			return clusterID;
 		}
 
-		public void setTimestamp(Long timestamp) {
-			this.timestamp = timestamp;
-		}
-
-		public Long getTimestamp() {
-			return timestamp;
-		}	
 		
 }
