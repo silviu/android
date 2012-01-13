@@ -239,18 +239,22 @@ public class SmartHomeProvider extends ContentProvider {
 	public int update(Uri uri, ContentValues values, String selection, String[] selectionArgs) 
 	{
 		int changed = 0;
-
+		Log.e("UPDATE", "INTRO");
 		switch (uriMatcher.match(uri)){
 		case UPDATEACTUATOR:
-			String newValue = values.getAsString(SETTING);
+			Log.e("UPDATE", "CASE");
+			String newValue = values.getAsString(SETTING); 
 			
 			//on/off switch cmd
 			String serverUri = protocol + host + cmdURL;
 			
 			try {
-				Boolean response = JSONParser.confirmSetting(serverUri, selectionArgs[0]);
-				if (response) {
+				String response = JSONParser.confirmSetting(serverUri, selectionArgs[0]);
+				Log.e("UPDATE", response.toString());
+
+				if (response.equalsIgnoreCase(newValue)) {
 					// setarea a fost schimbata pe server - o schimbam si local
+					Log.e("UPDATE", "UPDATEEEEEEEEEEEED");
 					changed = smarthomeDB.update(DATABASE_TABLE_ACTUATORS, values, "_id="+uri.getPathSegments().get(1), null);
 				}
 			} catch (Exception e) {

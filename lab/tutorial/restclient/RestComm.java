@@ -151,8 +151,6 @@ public class RestComm {
                 InputStream instream = entity.getContent();
                 String result= convertStreamToString(instream);
                 Log.i("Rest",result);
- 
-                
                 
                 return result;
             }

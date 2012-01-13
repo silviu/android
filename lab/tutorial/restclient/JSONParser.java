@@ -11,6 +11,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.media.audiofx.Equalizer;
+import android.util.Log;
 
 public class JSONParser {
 	// extract a device ID from a JSON description
@@ -39,10 +40,19 @@ public class JSONParser {
 	}
 	
 	// change an actuator setting and confirm
-	public static Boolean confirmSetting(String URI, String args) throws JSONException, ClientProtocolException, ConnectTimeoutException, UnsupportedEncodingException {
+	public static String confirmSetting(String URI, String args) throws JSONException, ClientProtocolException, ConnectTimeoutException, UnsupportedEncodingException {
 		String response = RestComm.restPost(URI, args);
+		Log.e("RESPONSE", response);
 		if (response != null) {
-			return response.equals("201");
+			String with_accolades = response.split(",")[4];
+			String accol = with_accolades.split(":")[1] + ":" + with_accolades.split(":")[2];
+			String no_accolades = accol.substring(2, accol.length()-2);
+			String onoff = no_accolades.split(":")[1];
+
+			if (onoff.equals("00"))
+				return "off";
+			else
+				return "on";
 		}
 		return null;
 	}
