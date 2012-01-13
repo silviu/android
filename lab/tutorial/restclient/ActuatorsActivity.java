@@ -15,6 +15,7 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -165,10 +166,21 @@ public class ActuatorsActivity extends Activity {
         	o = os[0];
 	    	newValue = o.onValue;
 	    	if (o.getSetting().equalsIgnoreCase("on")) newValue = o.offValue;
+	    	String url_val;
+	    	if (newValue.equalsIgnoreCase("on"))
+	    		url_val = "01";
+	    	else
+	    		url_val = "00";
+	    	
 	    	ContentValues editedValues = new ContentValues();
 	        editedValues.put(SmartHomeProvider.SETTING, newValue);
 	    	Uri actuatorChange = Uri.parse(provider+"/actuator/"+o.getId());
-	        if (getContentResolver().update(actuatorChange,editedValues,null,null)!=0)
+	    	String[] params = new String[5];
+	    	params[0]= o.getExtAddress() + "#" + o.getEndpoint() + "#" + 
+	    			   o.getClusterID()  + "#" + url_val         + "#" + 
+	    			   Long.toString(o.getTimestamp() + 1);
+	    	Log.e("PARAMS", params[0]);
+	        if (getContentResolver().update(actuatorChange,editedValues,null,params)!=0)
 	        	return true;
 	        return false;
         }

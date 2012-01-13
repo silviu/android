@@ -2,8 +2,14 @@
 
 package lab.tutorial.restclient.data;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
+import org.apache.http.NameValuePair;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.conn.ConnectTimeoutException;
+import org.apache.http.message.BasicNameValuePair;
 import org.json.JSONException;
 
 import lab.tutorial.restclient.JSONParser;
@@ -27,7 +33,7 @@ public class SmartHomeProvider extends ContentProvider {
 	public static final String protocol = "http://";
 	public static final String host = "embedded.cs.pub.ro/";
 	public static final String statusURL = "si/zigbee/status";
-	public static final String cmdURL = "si/zigbee/status";
+	public static final String cmdURL = "si/zigbee/cmd";
 
 	public static final String PROVIDER_NAME = "lab.tutorial.restclient.data.SmartHomeProvider";
 
@@ -138,7 +144,6 @@ public class SmartHomeProvider extends ContentProvider {
 
 				Log.d("SMARTHOMEPROVIDER", "ADDING DATA TO DATABASE");
 				String senzori = downl.getDBSensors();
-				Log.d("DATABASE INSERT", "WTFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF");
 				db.execSQL("INSERT INTO "+DATABASE_TABLE_SENSORS+" "+senzori);
 
 
@@ -231,22 +236,22 @@ public class SmartHomeProvider extends ContentProvider {
 		return c;
 	}
 
-	@Override
 	public int update(Uri uri, ContentValues values, String selection, String[] selectionArgs) 
 	{
 		int changed = 0;
 
 		switch (uriMatcher.match(uri)){
 		case UPDATEACTUATOR:
-			String newValue = values.getAsString(SETTING); 
-			String serverUri = protocol + host + cmdURL + 
-			ActuatorConstants.ACTUATOR + "/" + uri.getPathSegments().get(1) + ActuatorConstants.SETTING + 
-			newValue;
+			String newValue = values.getAsString(SETTING);
+			
+			//on/off switch cmd
+			String serverUri = protocol + host + cmdURL;
+			
 			try {
-				String response = JSONParser.confirmSetting(serverUri);
-				if (response.equalsIgnoreCase(newValue)) {
+				Boolean response = JSONParser.confirmSetting(serverUri, selectionArgs[0]);
+				if (response) {
 					// setarea a fost schimbata pe server - o schimbam si local
-					changed = smarthomeDB.update(DATABASE_TABLE_ACTUATORS, values, "_id="+uri.getPathSegments().get(1), selectionArgs);
+					changed = smarthomeDB.update(DATABASE_TABLE_ACTUATORS, values, "_id="+uri.getPathSegments().get(1), null);
 				}
 			} catch (Exception e) {
 				e.printStackTrace();
