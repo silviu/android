@@ -127,7 +127,7 @@ public class RestComm {
 		Log.e("cmd[endpoint]=", urlArgs[1]);
 		nameValuePairs.add(new BasicNameValuePair("cmd[clusterID]", urlArgs[2]));
 		Log.e("cmd[clusterID]=", urlArgs[2]);
-		nameValuePairs.add(new BasicNameValuePair("cmd[attributes]","{0000:" + urlArgs[3] + "}"));
+		nameValuePairs.add(new BasicNameValuePair("cmd[attributes]", urlArgs[3]));
 		Log.e("cmd[attributes]=", urlArgs[3]);
 		nameValuePairs.add(new BasicNameValuePair("cmd[timestamp]", urlArgs[4]));
 		Log.e("cmd[timestamp]=", urlArgs[4]);

@@ -239,13 +239,14 @@ public class SmartHomeProvider extends ContentProvider {
 		case UPDATEACTUATOR:
 			Log.e("UPDATE", "CASE");
 			String newValue = values.getAsString(SETTING); 
+			String class_type = values.getAsString(type);
 			
 			//on/off switch cmd
 			String serverUri = protocol + host + cmdURL;
 			
 			try {
-				String response = JSONParser.confirmSetting(serverUri, selectionArgs[0]);
-				Log.e("UPDATE", response.toString());
+				String response = JSONParser.confirmSetting(serverUri, selectionArgs[0], class_type);
+				Log.e("UPDATE", response);
 
 				if (response.equalsIgnoreCase(newValue)) {
 					// setarea a fost schimbata pe server - o schimbam si local

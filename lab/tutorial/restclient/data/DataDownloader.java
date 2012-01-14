@@ -92,7 +92,7 @@ public class DataDownloader extends Thread
 		int i = 0;
 		ArrayList<DataEntry> entry_list = new ArrayList<DataEntry>();
 		for (DataEntry d : dentry_list)
-			if (d.clusterID == id && i < 100) {
+			if (d.clusterID == id && i < 5) {
 				entry_list.add(d);
 				i++;
 			}
@@ -270,18 +270,14 @@ public class DataDownloader extends Thread
 			else
 			{
 				String thermostat_attribute = curr.attributes;
-				Log.e("THERMOSTAT ATTRIBUTE", thermostat_attribute);
 				String common = thermostat_attribute.substring(2, thermostat_attribute.length()-2);
-				Log.e("THERMOSTAT common", common);
 
 				String[] min_partial = common.split(",");
 				if (min_partial.length < 2)
 					continue;
 				String good = min_partial[0].split(":")[1];
-				Log.e("THERMOSTAT min_partial", good);
 
 				String min_str = good.substring(0, good.length()-1);
-				Log.e("THERMOSTAT min_str", min_str);
 
 				double min = ((double)Integer.parseInt(min_str, 16))/100;
 				

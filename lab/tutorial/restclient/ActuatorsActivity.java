@@ -9,8 +9,10 @@ import lab.tutorial.restclient.actuators.OnOffSwitch;
 import lab.tutorial.restclient.actuators.Thermostat;
 import lab.tutorial.restclient.data.SmartHomeProvider;
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.ContentValues;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
@@ -22,10 +24,14 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -38,6 +44,8 @@ public class ActuatorsActivity extends Activity {
 	private ArrayList<Actuator> actuatori;
 	// UI elements
 	private ListView lv;
+	private double new_thermostat_min = -1;
+	private double new_thermostat_max = -1;
 
 	/** Called when the activity is first created. */
 	@Override
@@ -84,6 +92,11 @@ public class ActuatorsActivity extends Activity {
 				// AsyncTask to toggle the setting of OnOffSwitch o 
 				if (o.getType().equalsIgnoreCase("switch"))
 					new ToggleOnOff().execute((OnOffSwitch)o);
+				else{
+					new_thermostat_min = -1;
+					new_thermostat_max = -1;
+					thermostat_read_text((Thermostat)o);
+				}
 			}
 		});
 	}
@@ -179,6 +192,108 @@ public class ActuatorsActivity extends Activity {
 			return v;
 		}
 	}
+	
+	private void thermostat_read_text(final Thermostat o) 
+	{
+		final AlertDialog alertDialog;
+		alertDialog = new AlertDialog.Builder(this).create();  
+		// Create the text field in the alert dialog...
+
+		LinearLayout layout= new LinearLayout(this);
+		layout.setOrientation(1); //1 is for vertical orientation
+
+		final EditText min_field = new EditText(this);
+		min_field.setSingleLine();
+		min_field.setInputType(0x00002002);
+		min_field.setHint("Min temp");
+
+		final EditText max_field = new EditText(this);
+		max_field.setSingleLine();
+		max_field.setInputType(0x00002002);
+		max_field.setHint("Max temp");
+
+		
+		final OnClickListener mCorkyListener = new OnClickListener() {
+		    public void onClick(View v) {
+		      alertDialog.dismiss();
+		    }
+		};
+
+		
+		Button cancel = new Button(this);
+		cancel.setOnClickListener(mCorkyListener);
+		cancel.setText("Cancel");
+
+		layout.addView(min_field);
+		layout.addView(max_field);
+		layout.addView(cancel);
+		alertDialog.setView(layout);
+		
+		
+		// Add text to dialog
+		alertDialog.setMessage("Please set the thermostat.");  
+		alertDialog.setButton("OK", new DialogInterface.OnClickListener() {  
+			public void onClick(DialogInterface dialog, int which) {
+				//save_therm_vals(min_field.getText().toString(), max_field.getText().toString());
+				if (min_field.getText().toString().isEmpty())
+					return;
+				
+				if (max_field.getText().toString().isEmpty())
+					return;
+				
+				new_thermostat_min = Double.parseDouble(min_field.getText().toString());
+				new_thermostat_max = Double.parseDouble(max_field.getText().toString());
+				new ThermostatUpdate().execute(o);
+			}
+		});         
+
+		alertDialog.show();
+	}
+	
+	
+	private class ThermostatUpdate extends AsyncTask<Thermostat, Void, Boolean> {
+
+		private Thermostat o;
+		private String newValue;
+		protected Boolean doInBackground(Thermostat... os) {
+			o = os[0];
+			
+			String newValue = Double.toString(new_thermostat_min) + "#" +
+							  Double.toString(new_thermostat_max);
+			
+			String new_min = Integer.toHexString((int)(new_thermostat_min * 100));
+			String new_max = Integer.toHexString((int)(new_thermostat_max * 100));
+
+			String attribute = "[{0015:" + new_min + "},{0016:" + new_max + "}]";
+
+			
+			ContentValues editedValues = new ContentValues();
+			editedValues.put(SmartHomeProvider.SETTING, newValue);
+			editedValues.put(SmartHomeProvider.type, "thermostat");
+
+			Uri actuatorChange = Uri.parse(provider+"/actuator/"+o.getId());
+			String[] params = new String[5];
+			params[0]= o.getExtAddress() + "#" + o.getEndpoint() + "#" + 
+			o.getClusterID()  + "#" + attribute  + "#" + 
+			Long.toString(o.getTimestamp() + 1);
+			Log.e("PARAMS", params[0]);
+
+			if (getContentResolver().update(actuatorChange,editedValues,null,params)!=0)
+				return true;
+			return false;
+		}
+
+		protected void onPostExecute(Boolean result) {
+			if (result){
+				o.setminVal(new_thermostat_min);
+				o.setmaxVal(new_thermostat_max);
+				((ListWithImageAdapter) lv.getAdapter()).notifyDataSetChanged();
+			} else {
+				Toast.makeText(getApplicationContext(), "Actuator setting change failed", Toast.LENGTH_SHORT);
+			}
+		}
+	}
+	
 
 	// custom AsyncTask that is called when an actuator is tapped in order to toggle its setting
 	private class ToggleOnOff extends AsyncTask<OnOffSwitch, Integer, Boolean> {
@@ -194,13 +309,15 @@ public class ActuatorsActivity extends Activity {
 				url_val = "01";
 			else
 				url_val = "00";
-
+			String attribute = "{0000:" + url_val + "}";
 			ContentValues editedValues = new ContentValues();
 			editedValues.put(SmartHomeProvider.SETTING, newValue);
+			editedValues.put(SmartHomeProvider.type, "switch");
+			
 			Uri actuatorChange = Uri.parse(provider+"/actuator/"+o.getId());
 			String[] params = new String[5];
 			params[0]= o.getExtAddress() + "#" + o.getEndpoint() + "#" + 
-			o.getClusterID()  + "#" + url_val         + "#" + 
+			o.getClusterID()  + "#" + attribute         + "#" + 
 			Long.toString(o.getTimestamp() + 1);
 			Log.e("PARAMS", params[0]);
 			if (getContentResolver().update(actuatorChange,editedValues,null,params)!=0)
