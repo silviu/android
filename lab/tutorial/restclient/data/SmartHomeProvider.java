@@ -158,6 +158,7 @@ public class SmartHomeProvider extends ContentProvider {
 				e1.printStackTrace();
 			}
 			Log.d("SMARTHOMEPROVIDER", "CREATING DATABASE");
+			
 			// Hack-ish initialisation. In a real case a smarter initialization is needed.
 			db.execSQL("DROP TABLE IF EXISTS "+DATABASE_TABLE_SENSORS);
 			db.execSQL("CREATE TABLE " + DATABASE_TABLE_SENSORS + " (" + _ID1 + 
@@ -179,9 +180,19 @@ public class SmartHomeProvider extends ContentProvider {
 
 				Log.d("SMARTHOMEPROVIDER", "ADDING DATA TO DATABASE");
 				
-				add_sensors(db, downl);
-				add_sensor_values(db, downl);
-				add_actuators(db, downl);
+				//add_sensors(db, downl);
+				//add_sensor_values(db, downl);
+				//add_actuators(db, downl);
+				
+				String senzori = downl.getDBSensors();
+				db.execSQL("INSERT INTO "+DATABASE_TABLE_SENSORS+" "+senzori);
+				
+				String values = downl.getDBSensorValues();
+				db.execSQL("INSERT INTO "+DATABASE_TABLE_SENSORVALUES+" "+values);
+
+				String actuatori = downl.getDBActuators();
+				db.execSQL("INSERT INTO "+DATABASE_TABLE_ACTUATORS+" "+actuatori);
+
 
 			} catch (Exception e) {
 				e.printStackTrace();

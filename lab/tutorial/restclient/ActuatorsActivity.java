@@ -126,6 +126,11 @@ public class ActuatorsActivity extends Activity {
 			Intent aIntent = new Intent(this, ActuatorsActivity.class);
 			startActivity(aIntent);
 			return true;
+		case R.id.profiles:
+			Intent pIntent = new Intent(this, ProfileActivity.class);
+			startActivity(pIntent);
+			return true;
+
 		default:
 			return super.onOptionsItemSelected(item);
 		}

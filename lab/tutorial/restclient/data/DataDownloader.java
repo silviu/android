@@ -97,7 +97,6 @@ public class DataDownloader extends Thread
 				i++;
 			}
 		return entry_list;
-		
 	}
 
 	public ArrayList<DataEntry> getDEBasicClusters()

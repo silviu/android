@@ -91,6 +91,7 @@ public class SensorsActivity extends Activity {
 					));
 			} while (c.moveToNext());
 		}
+		
 
 		// Configure UI for the sensor list
 		final ListWithImageAdapter la = new ListWithImageAdapter(this,R.layout.list_item, senzori);
@@ -198,6 +199,10 @@ public class SensorsActivity extends Activity {
 			Intent aIntent = new Intent(this, ActuatorsActivity.class);
 			startActivity(aIntent);
 			return true;
+		case R.id.profiles:
+			Intent pIntent = new Intent(this, ProfileActivity.class);
+			startActivity(pIntent);
+			return true;
 		default:
 			return super.onOptionsItemSelected(item);
 		}
@@ -223,7 +228,8 @@ public class SensorsActivity extends Activity {
 
 			Sensor s = items.get(position);
 			Uri allSensors = Uri.parse(provider+"/sensors");
-			Cursor c_sensor = managedQuery(allSensors, null, null, null, null);
+			/String selection = "extAddress='8765432AB5670001' AND endpoint='1'";
+			Cursor c_sensor = managedQuery(allSensors, null, selection, null, null);
 			if (s != null) {
 				TextView t = (TextView) v.findViewById(R.id.txtName);
 				if (t != null) {
@@ -236,7 +242,7 @@ public class SensorsActivity extends Activity {
 				t = (TextView) v.findViewById(R.id.txtValue);
 				if (t != null) {
 					Uri sensorValue = Uri.parse(provider+"/value/"+s.getId());
-					String[] columns = {"attributes"};
+					String[] columns = {"max(tstamp)", "attributes"};
 					Cursor c = managedQuery(sensorValue, columns, null, null, null);
 
 					if (c.moveToFirst()) {
