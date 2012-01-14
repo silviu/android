@@ -99,7 +99,47 @@ public class SmartHomeProvider extends ContentProvider {
 		public void onCreate(SQLiteDatabase db)
 		{
 		}
-
+		
+		
+		public void add_sensors(final SQLiteDatabase db, final DataDownloader downl)
+		{
+			new Thread(new Runnable() {
+				
+				@Override
+				public void run() {
+					String senzori = downl.getDBSensors();
+					db.execSQL("INSERT INTO "+DATABASE_TABLE_SENSORS+" "+senzori);
+					
+				}
+			}).start();
+		}
+		
+		public void add_sensor_values(final SQLiteDatabase db, final DataDownloader downl)
+		{
+			new Thread(new Runnable() {
+				
+				@Override
+				public void run() {
+					String values = downl.getDBSensorValues();
+					db.execSQL("INSERT INTO "+DATABASE_TABLE_SENSORVALUES+" "+values);
+					
+				}
+			}).start();
+		}
+		
+		public void add_actuators(final SQLiteDatabase db, final DataDownloader downl)
+		{
+			new Thread(new Runnable() {
+				
+				@Override
+				public void run() {
+					String actuatori = downl.getDBActuators();
+					db.execSQL("INSERT INTO "+DATABASE_TABLE_ACTUATORS+" "+actuatori);
+					
+				}
+			}).start();
+		}
+		
 		@Override
 		public void onOpen(SQLiteDatabase db)
 		{
@@ -138,15 +178,10 @@ public class SmartHomeProvider extends ContentProvider {
 			try {
 
 				Log.d("SMARTHOMEPROVIDER", "ADDING DATA TO DATABASE");
-				String senzori = downl.getDBSensors();
-				db.execSQL("INSERT INTO "+DATABASE_TABLE_SENSORS+" "+senzori);
-
-
-				String values = downl.getDBSensorValues();
-				db.execSQL("INSERT INTO "+DATABASE_TABLE_SENSORVALUES+" "+values);
 				
-				String actuatori = downl.getDBActuators();
-				db.execSQL("INSERT INTO "+DATABASE_TABLE_ACTUATORS+" "+actuatori);
+				add_sensors(db, downl);
+				add_sensor_values(db, downl);
+				add_actuators(db, downl);
 
 			} catch (Exception e) {
 				e.printStackTrace();

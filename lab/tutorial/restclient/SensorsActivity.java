@@ -231,7 +231,7 @@ public class SensorsActivity extends Activity {
 				}
 				t = (TextView) v.findViewById(R.id.txtLocation);
 				if (t != null) {
-					t.setText(s.getLocation());                            
+					t.setText(s.getLocation());
 				}
 				t = (TextView) v.findViewById(R.id.txtValue);
 				if (t != null) {

@@ -92,11 +92,12 @@ public class DataDownloader extends Thread
 		int i = 0;
 		ArrayList<DataEntry> entry_list = new ArrayList<DataEntry>();
 		for (DataEntry d : dentry_list)
-			if (d.clusterID == id && i < 5) {
+			if (d.clusterID == id && i < 50) {
 				entry_list.add(d);
 				i++;
 			}
 		return entry_list;
+		
 	}
 
 	public ArrayList<DataEntry> getDEBasicClusters()
@@ -106,6 +107,7 @@ public class DataDownloader extends Thread
 		return basic_clusters;
 	}
 
+	
 	public ArrayList<DataEntry> getDESensors()
 	{
 		ArrayList<DataEntry> sensor_list = new ArrayList<DataEntry>();
@@ -123,6 +125,7 @@ public class DataDownloader extends Thread
 			String[] split1 = sensor.attributes.split(",");
 			String[] split2 = split1[2].substring(1, split1[2].length()-1).split(":");
 			String location = split2[1];
+			Log.e("LOCATION", location);
 			extAddress_to_location.put(sensor.extAddress, location);
 		}
 	}
